@@ -1,4 +1,4 @@
-package pt.uminho.ceb.biosystems.merlin.merlin_transyt;
+package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
 
 
 import java.io.BufferedReader;
@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -19,15 +18,19 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HandlingRequestsAndRetrievalsTransyt {
+/**Handle requests and retrievals
+ * @author João Capela
+ *
+ */
+public class HandlingRequestsAndRetrievalsBiocoiso {
 
-	private static final String URL = "http://transytmanager.rosalind.di.uminho.pt";
+	private static final String URL = "http://rosalind.di.uminho.pt:8085";
 
-	final static Logger logger = LoggerFactory.getLogger(HandlingRequestsAndRetrievalsTransyt.class);
+	final static Logger logger = LoggerFactory.getLogger(HandlingRequestsAndRetrievalsBiocoiso.class);
 	
 	private final List<File> requiredFiles;
 
-	public HandlingRequestsAndRetrievalsTransyt(List<File> requiredFiles){
+	public HandlingRequestsAndRetrievalsBiocoiso(List<File> requiredFiles){
 
 		this.requiredFiles = requiredFiles;
 		
@@ -35,7 +38,7 @@ public class HandlingRequestsAndRetrievalsTransyt {
 	}
 
 	/**
-	 * Method that makes a connection to the URL http://transytmanager.rosalind.di.uminho.pt and submit files there
+	 * Method that makes a connection to the URL http://rosalind.di.uminho.pt:8085 and submit files there.
 	 * 
 	 * @return docker is a {@code String} which represents the ID of the docker used
 	 * @throws IOException
@@ -59,13 +62,12 @@ public class HandlingRequestsAndRetrievalsTransyt {
 		URLConnection connection = url.openConnection();
 		connection.setDoOutput(true);
 		connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
-
 		try (
 				OutputStream output = connection.getOutputStream();
 				PrintWriter writer = new PrintWriter(new OutputStreamWriter(output, charset), true);
 				) {
 			for (File file : this.requiredFiles){
-
+				logger.info("File path coiser: " + file.getAbsolutePath());
 				// Send normal param.
 				writer.append("--" + boundary).append(CRLF);
 				writer.append("Content-Disposition: form-data; name=\"param\"").append(CRLF);
@@ -88,6 +90,7 @@ public class HandlingRequestsAndRetrievalsTransyt {
 			logger.error("Error submitting files");
 
 		}
+		
 
 		// Request is lazily fired whenever you need to obtain information about response.
 		int responseCode = ((HttpURLConnection) connection).getResponseCode();
@@ -100,10 +103,10 @@ public class HandlingRequestsAndRetrievalsTransyt {
 		String docker = null;
 		
 		logger.info(uploadUrl);
-		if (responseCode==202)
+		if (responseCode==202 || responseCode==201)
 		{
 			while ((html = in.readLine()) != null){
-				if (html.contains("workerID")) {
+				if (html.contains("submissionID")) {
 					String[] parts = html.split(":");
 					docker = parts[1].replace("\"", "").trim();
 				}
@@ -118,27 +121,31 @@ public class HandlingRequestsAndRetrievalsTransyt {
 			logger.error("Something went wrong while processing the request, please try again");
 			return null;
 		}
+		else if (responseCode == 400) {
+			logger.error("The submitted files are fewer than expected");
+			return null;
+		}
 		else {
 			logger.error("Unkown error");
 			return null;
 		}
 		
-		logger.info("The docker {} was assigned to work", docker);
+		logger.info("The submission {} was assigned to work", docker);
 		return docker;
 	}
 
 	/**
 	 * This method aims to get information about a given docker status in order to determine whether the submission is completed or not.
 	 * 
-	 * @param docker: the parameter is a {@code String} which represents the docker ID whose status will be analised
-	 * @return Boolean: if the docker status is either 200 or 202 the method returns true or false, respectivelly, otherwise returns null
+	 * @param submissionID: the parameter is a {@code String} which represents the submission ID whose status will be analyzed
+	 * @return Boolean: if the submission status is either 200 or 202 the method returns true or false, respectively, otherwise returns null
 	 * @throws IOException
 	 */
-	public Boolean getStatus(String docker) throws IOException {
+	public int getStatus(String submissionID) throws IOException {
 
 		String uploadUrl = URL.concat("/status");
 
-		uploadUrl = uploadUrl.concat("/"+docker);
+		uploadUrl = uploadUrl.concat("/"+submissionID);
 
 		URL url = new URL(uploadUrl);
 
@@ -147,27 +154,30 @@ public class HandlingRequestsAndRetrievalsTransyt {
 		int responseCode = conn.getResponseCode();
 
 		if (responseCode==200) {
-			return true;
+			return responseCode;
 		}
 		else if (responseCode==202) {
-			return false;
+			return responseCode;
 		}
-		return null;
+		else if (responseCode==201) {
+			return responseCode;
+		}
+		return responseCode;
 
 	}
 
 	/**
 	 * Method that enables the download of the file related to the submission previously made by the user.
-	 * @param docker: This parameter is a {@code String} which is the docker ID that the user has been used
+	 * @param submissionID: This parameter is a {@code String} which is the submission ID that the user has been used
 	 * @param path: This parameter is a {@code String} with the output .tar.gz file
 	 * @throws IOException 
 	 */
-	public boolean downloadFile(String docker, String path) throws IOException {
+	public boolean downloadFile(String submissionID, String path) throws IOException {
 
 		try {
 			String uploadUrl = URL.concat("/download");
 
-			uploadUrl = uploadUrl.concat("/"+docker);
+			uploadUrl = uploadUrl.concat("/"+submissionID);
 
 			URL downloadUrl = new URL(uploadUrl);
 
@@ -179,7 +189,7 @@ public class HandlingRequestsAndRetrievalsTransyt {
 			
 			if (responseCode==200) {
 
-				File f = new File(path.concat(".tar.gz"));
+				File f = new File(path);
 
 				FileUtils.copyURLToFile(downloadUrl, f);
 				
@@ -201,37 +211,6 @@ public class HandlingRequestsAndRetrievalsTransyt {
 		}
 	}
 
-	/**
-	 * The function of this method is to close the connection previously established.
-	 * @param docker : This parameter is a {@code String} which is the docker ID that the user has been used
-	 */
-	public void closeConnection(String docker){
-		try {
-			String uploadUrl = URL.concat("/closeConnection");
-
-			uploadUrl = uploadUrl.concat("/"+docker);
-
-			URL url = new URL(uploadUrl);
-
-			//		int responseCode = ((HttpURLConnection) connection).getResponseCode();
-
-			HttpURLConnection conn = (HttpURLConnection)url.openConnection();
-
-			int responseCode = conn.getResponseCode();
-						
-			if (responseCode!=200) 
-				logger.error("Error closing the connection for docker identified by: " + docker); 
-			else 
-				logger.info("The connection was closed successfully for docker identified by: " + docker); 
-
-		} 
-		catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 
 
 }

@@ -1,22 +1,38 @@
 <plugin start="true">
-    <uid>merlin-transyt</uid>
-    <name>pt.uminho.ceb.biosystems.merlin.transyt</name>
-    <version>2.5.1</version>
-    
-    <dependencies>
-        <dependency uid="merlin"/>
-    </dependencies>
-    
-    <extensions>
-        <extension uid="aibench.core" name="aibench.core.operation-definition"
-            class="pt.uminho.ceb.biosystems.merlin.merlin_transyt.TranSyTRetriever">
-            <operation-description name="TranSyT"
-                path="40@model/" uid="operations.TranSyT.ID" />
-        </extension>
+	<uid>merlin-biocoiso</uid>
+	<name>pt.uminho.ceb.biosystems.merlin.biocoiso</name>
+	<version>2.5.1</version>
 
-       <extension uid="aibench.workbench" name="aibench.workbench.view">
-            <icon-operation operation="operations.TranSyT.ID"
-               icon="icons/Lifecycle/remote.png" />
-        </extension>
-    </extensions>
+	<dependencies>
+		<dependency uid="merlin" />
+	</dependencies>
+
+	<extensions>
+		<extension uid="aibench.core"
+			name="aibench.core.operation-definition"
+			class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.BiocoisoRetriever">
+			<operation-description name="BioCoISO"
+				path="50@model/" uid="operations.BioCoISO.ID" />
+		</extension>
+
+		<extension uid="aibench.workbench"
+			name="aibench.workbench.view">
+			<icon-operation operation="operations.BioCoISO.ID"
+				icon="icons/Lifecycle/remote.png" />
+		</extension>
+
+		<extension uid="aibench.workbench"
+			name="aibench.workbench.view">
+
+			<gui-operation operation="operations.BioCoISO.ID"
+				class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.BiocoisoGUI" />
+		</extension>
+
+		<extension uid="aibench.workbench"
+			name="aibench.workbench.view">
+			<view name="BioCoISO results"
+				datatype="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB"
+				class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoisoAIBView" />
+		</extension>
+	</extensions>
 </plugin>
