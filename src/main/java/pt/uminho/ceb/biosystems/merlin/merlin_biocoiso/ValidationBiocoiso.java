@@ -2,7 +2,6 @@ package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
 
 import java.util.HashMap;
 
-import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceEntity;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceTable;

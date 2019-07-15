@@ -19,7 +19,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 
-import org.apache.jute.compiler.JBoolean;
 import org.sing_group.gc4s.dialog.AbstractInputJDialog;
 import org.sing_group.gc4s.input.InputParameter;
 import org.sing_group.gc4s.input.InputParametersPanel;
@@ -124,8 +123,8 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 				dispose();
 				rec.paramsIntroduced(
 						new ParamSpec[]{
-								new ParamSpec("new model", String.class, models.getSelectedItem().toString(), null),
 								new ParamSpec("e_Biomass", String.class,biomass.getSelectedItem().toString(),null),
+								new ParamSpec("new model", String.class, models.getSelectedItem().toString(), null),
 								new ParamSpec("Objective", String.class,objective.getSelectedItem().toString(),null)
 								
 						}
@@ -169,24 +168,26 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	
 	private InputParameter[] getInputParameters() {
 		InputParameter[] parameters = new InputParameter[3];
+		parameters[1] = 
+				new InputParameter(
+						"new model", 
+						models, 
+						""
+						);
+		parameters[0] = 
+				new InputParameter(
+						"e_Biomass",
+						biomass,
+						""
+						);
 		parameters[2] = 
 				new InputParameter(
 						"objective", 
 						objective, 
 						""
 						);
-		parameters[1] = 
-				new InputParameter(
-						"e_Biomass",
-						biomass,
-						""
-						);
-		parameters[0] = 
-				new InputParameter(
-						"new model", 
-						models, 
-						""
-						);
+		
+		
 
 		return parameters;
 	}
@@ -201,12 +202,13 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		SBMLWriter sBMLWriter = null;
 		try {
 			biocoisoFile.mkdir();
+			
 			sBMLWriter = new SBMLWriter(workspace.getDatabase().getDatabaseAccess(), 
 					biocoisoFile.toString().concat("/model.xml"),
 					workspace.getName(),
 					ProjectServices.isCompartmentalisedModel(workspace.getDatabase().getDatabaseName()), 
 					false,
-					null, 
+					"e-Biomass", 
 					SBMLLevelVersion.L2V1);
 			
 			

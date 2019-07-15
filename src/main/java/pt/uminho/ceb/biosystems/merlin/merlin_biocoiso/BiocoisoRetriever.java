@@ -42,7 +42,6 @@ import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLWriter;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceEntity;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.database.connector.databaseAPI.ModelAPI;
-import pt.uminho.ceb.biosystems.merlin.database.connector.databaseAPI.ProjectAPI;
 import pt.uminho.ceb.biosystems.merlin.database.connector.datatypes.Connection;
 import pt.uminho.ceb.biosystems.merlin.database.connector.datatypes.DatabaseAccess;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
@@ -83,11 +82,12 @@ public class BiocoisoRetriever implements Observer {
 
 	}
 
-	@Port(direction=Direction.INPUT, name="e_Biomass",description="", order = 2)
+	@Port(direction=Direction.INPUT, name="e_Biomass",description="", order = 1)
 	public void setBiomass (String biomass_coiso){
 
 		if (biomass_coiso.equals("true")) {
 			this.biomass=true;
+			System.out.println("biomassa verdadeira");
 		}
 		else {
 			this.biomass=false;
@@ -96,7 +96,7 @@ public class BiocoisoRetriever implements Observer {
 	}
 
 
-	@Port(direction=Direction.INPUT, name="new model",description="select the new model workspace",validateMethod="checkNewProject", order = 1)
+	@Port(direction=Direction.INPUT, name="new model",description="select the new model workspace",validateMethod="checkNewProject", order = 2)
 	public void setNewProject(String projectName) throws Exception {
 
 
@@ -487,7 +487,7 @@ public class BiocoisoRetriever implements Observer {
 				project.getName(), 
 				ProjectServices.isCompartmentalisedModel(this.project.getDatabase().getDatabaseName()), 
 				false,
-				null, 
+				"e-Biomass", 
 				SBMLLevelVersion.L2V1);
 
 		sBMLWriter.getDataFromDatabase();
@@ -495,9 +495,9 @@ public class BiocoisoRetriever implements Observer {
 		sBMLWriter.toSBML(true);
 
 		if (this.biomass) {
-
+			
 			Map<String, String> dictionary = sBMLWriter.getReactionLabels();
-
+			
 			String biomass_id = dictionary.get("e-Biomass");
 
 			this.reaction=biomass_id;
@@ -509,7 +509,7 @@ public class BiocoisoRetriever implements Observer {
 		saveWordInFile(biocoisoFolder.toString().concat("/biomass.txt"), this.reaction);
 
 		saveWordInFile(biocoisoFolder.toString().concat("/protein.txt"), this.protein);
-
+		
 		File biomassFile = new File(biocoisoFolder.toString().concat("/biomass.txt"));
 
 		File proteinFile = new File(biocoisoFolder.toString().concat("/protein.txt"));
