@@ -203,7 +203,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		try {
 			biocoisoFile.mkdir();
 			
-			sBMLWriter = new SBMLWriter(workspace.getDatabase().getDatabaseAccess(), 
+			sBMLWriter = new SBMLWriter(workspace.getName(), workspace.getDatabase().getDatabaseAccess(), 
 					biocoisoFile.toString().concat("/model.xml"),
 					workspace.getName(),
 					ProjectServices.isCompartmentalisedModel(workspace.getDatabase().getDatabaseName()), 

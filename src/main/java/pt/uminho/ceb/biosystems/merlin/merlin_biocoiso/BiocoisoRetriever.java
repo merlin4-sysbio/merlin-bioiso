@@ -482,7 +482,7 @@ public class BiocoisoRetriever implements Observer {
 		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
 
-		SBMLWriter sBMLWriter = new SBMLWriter(this.msqlmt, 
+		SBMLWriter sBMLWriter = new SBMLWriter(this.project.getName(), this.msqlmt, 
 				biocoisoFolder.toString().concat("/model.xml"),
 				project.getName(), 
 				ProjectServices.isCompartmentalisedModel(this.project.getDatabase().getDatabaseName()), 
