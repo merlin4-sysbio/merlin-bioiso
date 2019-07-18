@@ -46,6 +46,7 @@ import pt.uminho.ceb.biosystems.merlin.database.connector.datatypes.Connection;
 import pt.uminho.ceb.biosystems.merlin.database.connector.datatypes.DatabaseAccess;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
+import pt.uminho.ceb.biosystems.merlin.services.model.ModelGenesServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.Enumerators.SequenceType;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 
@@ -174,24 +175,19 @@ public class BiocoisoRetriever implements Observer {
 	/**
 	 * @param project
 	 */
-	public void checkNewProject(String projectName) {
+	public void checkNewProject(String workspaceName) {
 
+		if(workspaceName == "") {
 
-
-
-		if(projectName == "") {
-
-			throw new IllegalArgumentException("no worksapce selected!");
+			throw new IllegalArgumentException("no workspace selected!");
 		}
 		else {
 
-			this.project = AIBenchUtils.getProject(projectName);;
+			this.project = AIBenchUtils.getProject(workspaceName);;
 
 			try {
-				Connection conn = new Connection(project.getDatabase().getDatabaseAccess());
-				Statement stmt = conn.createStatement();
 
-				if(!ModelAPI.checkGenomeSequences(stmt,SequenceType.PROTEIN)) {
+				if(!ModelGenesServices.checkGenomeSequences(workspaceName, SequenceType.PROTEIN)) {
 					throw new IllegalArgumentException("please set the project fasta ('.faa' or '.fna') files");
 				}
 				else if(this.project.getTaxonomyID()<0) {
@@ -199,10 +195,9 @@ public class BiocoisoRetriever implements Observer {
 					throw new IllegalArgumentException("please enter the taxonomic identification from NCBI taxonomy");
 				}
 
-				stmt.close();
-
-			} catch (SQLException e1) {
-				e1.printStackTrace();
+			} catch (Exception e) {
+				Workbench.getInstance().error(e);
+				e.printStackTrace();
 			}
 		}
 	}
