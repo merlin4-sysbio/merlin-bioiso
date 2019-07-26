@@ -24,6 +24,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +53,7 @@ import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelGenesServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.Enumerators.SequenceType;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
+import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 
 /**Aibench operation for BioCoISO
@@ -68,36 +73,59 @@ public class BiocoisoRetriever implements Observer {
 	public static final String BIOCOISO_FILE_NAME = "biocoiso";
 	private String biocoisoResultsFile;
 	private String reaction;
-	private String protein;
 	private DatabaseAccess msqlmt;
 	final static Logger logger = LoggerFactory.getLogger(BiocoisoRetriever.class);
 	boolean biomass;
+	private Map<?,?> resultMap;
+	private String level;
 
 
 
+	@Port(direction=Direction.INPUT, name="Reaction",description="", order = 2)
+	public void setReaction (String reaction){
 
-	@Port(direction=Direction.INPUT, name="Objective",description="", order = 3)
-	public void setObjective (String objective) throws Exception{
-
-		this.reaction=objective;
+		this.reaction=reaction;
 
 	}
 
-	@Port(direction=Direction.INPUT, name="e_Biomass",description="", order = 1)
-	public void setBiomass (String biomass_coiso){
+	@Port(direction=Direction.INPUT, name="Level",description="", order = 3)
+	public void setLevel (String level) throws Exception{
 
-		if (biomass_coiso.equals("true")) {
-			this.biomass=true;
-			System.out.println("biomassa verdadeira");
+		this.level=level;
+		
+		creationOfRequiredFiles();
+
+		this.startTime = GregorianCalendar.getInstance().getTimeInMillis();
+
+		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 4, "submitting files...");
+
+		
+		boolean submitted = false; //submitFiles();
+
+		if (submitted && !this.cancel.get()) {
+
+
+			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 4, "Rendering results...");
+
+			logger.info("The files for BioCoISO were submitted successfully");
+
+			Workbench.getInstance().info("The files for BioCoISO were submitted successfully");
+
+			executeOperation();
+		}
+		else if(this.cancel.get()) {
+			Workbench.getInstance().warn("operation canceled!");
 		}
 		else {
-			this.biomass=false;
+			Workbench.getInstance().error("error while doing the operation! please try again");
+
+			executeOperation();
+
 		}
 
 	}
 
-
-	@Port(direction=Direction.INPUT, name="new model",description="select the new model workspace",validateMethod="checkNewProject", order = 2)
+	@Port(direction=Direction.INPUT, name="Workspace",description="select the new model workspace",validateMethod="checkNewProject", order = 1)
 	public void setNewProject(String projectName) throws Exception {
 
 
@@ -105,71 +133,43 @@ public class BiocoisoRetriever implements Observer {
 
 		this.msqlmt = this.project.getDatabase().getDatabaseAccess();
 
-		creationOfRequiredFiles();
-
-		this.startTime = GregorianCalendar.getInstance().getTimeInMillis();
-
-		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 4, "submitting files...");
-
-		boolean submitted = submitFiles();
-
-		if (submitted && !this.cancel.get()) {
-			
-
-			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 4, "Rendering results...");
-
-			logger.info("The files for BioCoISO were submitted successfully");
-
-			Workbench.getInstance().info("The files for BioCoISO were submitted successfully");
-			
-			int table_number = this.project.getDatabase().getValidation().getEntities().size() + 1;
-			
-			String name = "BioCoISO_" + Integer.toString(table_number);
-
-			String[] columnsName = new String[] {"metabolite","flux","info"};
-
-			WorkspaceTableAIB table = new WorkspaceTableAIB(name, columnsName , this.project.getName(), new Connection(this.project.getDatabase().getDatabaseAccess()));
-
-			WorkspaceGenericDataTable filledTable = this.createDataTable(biocoisoResultsFile.concat("result.csv"), Arrays.asList(columnsName), this.project.getName(), name);
-			
-			ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name);
-			
-			Connection connection = new Connection(this.msqlmt);
-
-			biocoiso.setConnection(connection); 
-			
-			biocoiso.setWorkspace(this.project);
-			
-			biocoiso.setMainTableData(filledTable);
-			
-			biocoiso.setData(filledTable);
-			
-			ArrayList<WorkspaceEntity> newList = new ArrayList<WorkspaceEntity>();
-			
-			for (WorkspaceEntity entity : this.project.getDatabase().getValidation().getEntities()) {
-				newList.add(entity);
-			}
-			
-			newList.add(biocoiso);
-			
-			this.project.getDatabase().getValidation().setEntities(newList);
-
-		}
-		else if(this.cancel.get()) {
-			Workbench.getInstance().warn("operation canceled!");
-		}
-		else {
-			Workbench.getInstance().error("error while doing the operation! please try again");
-		}
-		
-		
-		
-		
-		
-		
-
 	}
 
+	private void executeOperation() throws IOException, ParseException {
+		
+		int table_number = this.project.getDatabase().getValidation().getEntities().size() + 1;
+
+		String name = "BioCoISO_" + Integer.toString(table_number);
+
+		String[] columnsName = new String[] {"info","metabolite","flux", "children", "description"};
+
+		WorkspaceTableAIB table = new WorkspaceTableAIB(name, columnsName , this.project.getName(), new Connection(this.project.getDatabase().getDatabaseAccess()));
+
+		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results.json"), Arrays.asList(columnsName), this.project.getName(), name);
+
+		ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name, filledTableAndNextLevel.getB());
+
+		Connection connection = new Connection(this.msqlmt);
+
+		biocoiso.setConnection(connection); 
+
+		biocoiso.setWorkspace(this.project);
+
+		biocoiso.setMainTableData(filledTableAndNextLevel.getA());
+
+		biocoiso.setData(filledTableAndNextLevel.getA());
+
+		ArrayList<WorkspaceEntity> newList = new ArrayList<WorkspaceEntity>();
+
+		for (WorkspaceEntity entity : this.project.getDatabase().getValidation().getEntities()) {
+			newList.add(entity);
+		}
+
+		newList.add(biocoiso);
+
+		this.project.getDatabase().getValidation().setEntities(newList);
+		
+	}
 
 	//////////////////////////ValidateMethods/////////////////////////////
 	/**
@@ -285,9 +285,9 @@ public class BiocoisoRetriever implements Observer {
 						boolean stop=false;
 
 						int i = 0;
-						
+
 						//The following code will show different error and warning messages to merlin users depending on the error founded
-						
+
 						while (!stop && i<listOfFiles.length) {
 							if (listOfFiles[i].getName().equals("1") ) {
 								Workbench.getInstance().warn("Fail loading the model");
@@ -359,7 +359,7 @@ public class BiocoisoRetriever implements Observer {
 		return path;
 
 	}
-	
+
 	/**
 	 * This method verifies the key in the md5 file and checks whether the results were corrupted or not.
 	 * @return boolean informing whether the results were corrupted or not.
@@ -386,7 +386,7 @@ public class BiocoisoRetriever implements Observer {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * This method read a word in a file
 	 * @param path: {@code String} with the path for the file
@@ -489,34 +489,23 @@ public class BiocoisoRetriever implements Observer {
 
 		sBMLWriter.toSBML(true);
 
-		if (this.biomass) {
-			
-			Map<String, String> dictionary = sBMLWriter.getReactionLabels();
-			
-			String biomass_id = dictionary.get("e-Biomass");
 
-			this.reaction=biomass_id;
+		saveWordInFile(biocoisoFolder.toString().concat("/reaction.txt"), this.reaction);
 
-			this.protein = "e-Protein_e-Protein";
+		saveWordInFile(biocoisoFolder.toString().concat("/level.txt"), this.level);
 
-		}
+		File reactionFile = new File(biocoisoFolder.toString().concat("/reaction.txt"));
 
-		saveWordInFile(biocoisoFolder.toString().concat("/biomass.txt"), this.reaction);
-
-		saveWordInFile(biocoisoFolder.toString().concat("/protein.txt"), this.protein);
-		
-		File biomassFile = new File(biocoisoFolder.toString().concat("/biomass.txt"));
-
-		File proteinFile = new File(biocoisoFolder.toString().concat("/protein.txt"));
+		File levelFile = new File(biocoisoFolder.toString().concat("/level.txt"));
 
 
 		File modelFile = new File(biocoisoFolder.toString().concat("/model.xml"));
 
-		if (modelFile.exists() && biomassFile.exists() && proteinFile.exists()) {
+		if (modelFile.exists() && reactionFile.exists() && levelFile.exists()) {
 
-			requiredFiles.add(biomassFile);
+			requiredFiles.add(reactionFile);
 
-			requiredFiles.add(proteinFile);
+			requiredFiles.add(levelFile);
 
 			requiredFiles.add(modelFile);
 
@@ -576,57 +565,36 @@ public class BiocoisoRetriever implements Observer {
 
 
 	}
-	
+
 	/**
 	 * This method creates the data table with the results. This table will be rendered in BioCoISO's view.
 	 * @param file
 	 * @param columnsNames
 	 * @param name
 	 * @param windowName
-	 * @return WorkspaceGenericDataTable with the resuts.
+	 * @return WorkspaceGenericDataTable with the results.
 	 * @throws IOException
+	 * @throws ParseException 
 	 */
 
-	public WorkspaceGenericDataTable createDataTable(String file, List<String> columnsNames, String name, String windowName) throws IOException {
+	public Pair<WorkspaceGenericDataTable, Map<?,?>> createDataTable(String file, List<String> columnsNames, String name, String windowName) throws IOException, ParseException {
 
-		WorkspaceGenericDataTable newTable = new WorkspaceGenericDataTable(columnsNames , name , windowName);
+		JSONParser jsonParser = new JSONParser();
 
-		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+		try (FileReader reader = new FileReader(file))
+		{
+			//Read JSON file
+			Object obj = (JSONObject) jsonParser.parse(reader);
 
-			String line;
+			JSONObject jo = (JSONObject) obj; 
+			this.resultMap = (Map<?, ?>) jo; //level 1
+			Pair<WorkspaceGenericDataTable, Map<?,?>> tableAndNextLevel = BiocoisoUtilities.tableCreator(resultMap, name, windowName, "M_fictitious");
 			
-			br.readLine(); //jumping the header
-			while ((line = br.readLine()) != null) {
-				String[] res = new String[3];
-				String[] values = line.split(",");
-				res[0]=values[0];
-				res[1]=values[1];
-				try { //change in the next version of BioCoISO
-				if (Float.parseFloat(res[1]) >0) {
-					res[2] = "OK, this metabolite is being produced";
-				}
-				else {
-					res[2] = "To review. This metabolite is not being produced";
-				}
-				
-				}
-				
-				catch (NumberFormatException e) {
-					res[2]="";
-					
-				}
-				newTable.addLine(res);
-			}
-			}
-		
+			return tableAndNextLevel;
+		}}
+	
 
-		return newTable;
-	}
-
-
-
-
-
+	
 	/**
 	 * @return the progress
 	 */
@@ -654,7 +622,7 @@ public class BiocoisoRetriever implements Observer {
 		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, this.counter.get(), this.querySize.get(), message);
 	}
 
-	
+
 
 
 	//	public void propertyChange(PropertyChangeEvent evt) {
