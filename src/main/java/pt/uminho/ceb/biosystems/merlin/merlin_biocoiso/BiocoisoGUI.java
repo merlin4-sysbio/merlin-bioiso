@@ -17,6 +17,7 @@ import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
 import org.sing_group.gc4s.dialog.AbstractInputJDialog;
@@ -51,11 +52,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 	private ExtendedJComboBox<String> objective ;
 	private ExtendedJComboBox<String> models ;
-	private ExtendedJComboBox<String> biomass;
-	private static final String[] biomass_values = {
-			"true",
-			"false",
-		};
+	private JTextField level;
 	private ParamsReceiver rec;
 
 	protected Object project;
@@ -83,8 +80,6 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 		List<ClipboardItem> cl = Core.getInstance().getClipboard().getItemsByClass(WorkspaceAIB.class);                    
 				
-		this.biomass = new ExtendedJComboBox<String>(biomass_values);
-		
 		workspaces = new String[cl.size()];
 		for (int i = 0; i < cl.size(); i++) {
 
@@ -92,6 +87,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		}
 		this.models = new ExtendedJComboBox<String>(workspaces);
 		this.objective = new ExtendedJComboBox<String>(new String[0]);
+		this.level = new JTextField();
 		if(this.models.getModel().getSize()>0)
 			this.setReactions();
 
@@ -123,9 +119,10 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 				dispose();
 				rec.paramsIntroduced(
 						new ParamSpec[]{
-								new ParamSpec("e_Biomass", String.class,biomass.getSelectedItem().toString(),null),
-								new ParamSpec("new model", String.class, models.getSelectedItem().toString(), null),
-								new ParamSpec("Objective", String.class,objective.getSelectedItem().toString(),null)
+								new ParamSpec("Workspace", String.class,models.getSelectedItem().toString(),null),
+								new ParamSpec("Reaction", String.class,objective.getSelectedItem().toString(),null),
+								new ParamSpec("Level", String.class, level.getText(), null)
+								
 								
 						}
 						);
@@ -168,21 +165,21 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	
 	private InputParameter[] getInputParameters() {
 		InputParameter[] parameters = new InputParameter[3];
-		parameters[1] = 
-				new InputParameter(
-						"new model", 
-						models, 
-						""
-						);
 		parameters[0] = 
 				new InputParameter(
-						"e_Biomass",
-						biomass,
+						"Workspace", 
+						models, 
 						""
 						);
 		parameters[2] = 
 				new InputParameter(
-						"objective", 
+						"Level",
+						level,
+						""
+						);
+		parameters[1] = 
+				new InputParameter(
+						"Reaction", 
 						objective, 
 						""
 						);

@@ -17,12 +17,12 @@
 			<name>Nexus BioSystems Server</name>
 			<url>https://nexus.bio.di.uminho.pt/content/groups/public/</url>
 		</repository>
-		
-		<!-- <repository>
-		   <id>sing-repository</id>
-		   <name>SING repository</name>
-		   <url>http://maven.sing-group.org/repository/maven/</url>
-	    </repository> -->
+
+		<repository>
+			<id>sing-repository</id>
+			<name>SING repository</name>
+			<url>http://maven.sing-group.org/repository/maven/</url>
+		</repository>
 	</repositories>
 
 	<properties>
@@ -105,11 +105,13 @@
 			<artifactId>mew-utilities</artifactId>
 			<version>1.1.0</version>
 		</dependency>
-		 <!-- <dependency>
-			<groupId>org.sing_group</groupId>
-			<artifactId>gc4s</artifactId> Name of the GC4S module
-			<version>1.2.2</version> 
-		</dependency> -->
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+		<!-- </dependency> <groupId>org.sing_group</groupId> <artifactId>gc4s</artifactId> 
+			<version>1.2.2</version> </dependency> -->
 
 
 	</dependencies>

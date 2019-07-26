@@ -2,6 +2,7 @@ package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
 
 import java.util.HashMap;
 
+import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceEntity;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceTable;
@@ -21,7 +22,7 @@ public class ValidationBiocoiso extends WorkspaceEntity implements IEntity {
 
 	
 
-
+	protected WorkspaceDataTable[] rowInfo;
 	private HashMap<String, String> names;
 	protected WorkspaceGenericDataTable data;
 	private HashMap<Integer, Integer[]> searchData;
@@ -59,7 +60,7 @@ public class ValidationBiocoiso extends WorkspaceEntity implements IEntity {
 
 	public String getSingular() {
 		
-		return "pathway: ";
+		return "Biocoiso: ";
 	}
 
 	/**
@@ -75,5 +76,7 @@ public class ValidationBiocoiso extends WorkspaceEntity implements IEntity {
 	public void setSearchData(HashMap<Integer, Integer[]> searchData) {
 		this.searchData = searchData;
 	}
+
+
 
 }
