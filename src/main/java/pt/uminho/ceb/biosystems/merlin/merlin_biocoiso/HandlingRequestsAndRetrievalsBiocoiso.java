@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HandlingRequestsAndRetrievalsBiocoiso {
 
-	private static final String URL = "http://rosalind.di.uminho.pt:8085";
+	private static final String URL = "https://biocoiso.bio.di.uminho.pt";
 
 	final static Logger logger = LoggerFactory.getLogger(HandlingRequestsAndRetrievalsBiocoiso.class);
 	
