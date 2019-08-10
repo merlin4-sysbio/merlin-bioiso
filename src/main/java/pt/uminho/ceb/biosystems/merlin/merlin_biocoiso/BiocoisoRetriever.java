@@ -93,14 +93,14 @@ public class BiocoisoRetriever implements Observer {
 
 		this.level=level;
 		
-		creationOfRequiredFiles();
+		//creationOfRequiredFiles();
 
 		this.startTime = GregorianCalendar.getInstance().getTimeInMillis();
 
 		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 4, "submitting files...");
 
 		
-		boolean submitted = false; //submitFiles();
+		boolean submitted = submitFiles();
 
 		if (submitted && !this.cancel.get()) {
 
@@ -145,7 +145,7 @@ public class BiocoisoRetriever implements Observer {
 
 		WorkspaceTableAIB table = new WorkspaceTableAIB(name, columnsName , this.project.getName(), new Connection(this.project.getDatabase().getDatabaseAccess()));
 
-		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results.json"), Arrays.asList(columnsName), this.project.getName(), name);
+		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), Arrays.asList(columnsName), this.project.getName(), name);
 
 		ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name, filledTableAndNextLevel.getB());
 
@@ -372,7 +372,7 @@ public class BiocoisoRetriever implements Observer {
 
 		MessageDigest md5Digest = MessageDigest.getInstance("MD5");
 
-		File file = new File(path.concat("/result.csv"));
+		File file = new File(path.concat("/results_".concat(BIOCOISO_FILE_NAME).concat(".json")));
 
 		String checksum = getFileChecksum(md5Digest, file);
 
