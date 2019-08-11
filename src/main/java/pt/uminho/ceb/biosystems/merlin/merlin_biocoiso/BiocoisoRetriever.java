@@ -490,13 +490,13 @@ public class BiocoisoRetriever implements Observer {
 		sBMLWriter.toSBML(true);
 
 
-		saveWordInFile(biocoisoFolder.toString().concat("/reaction.txt"), this.reaction);
+		saveWordInFile(biocoisoFolder.toString().concat("/biomass.txt"), this.reaction);
 
-		saveWordInFile(biocoisoFolder.toString().concat("/level.txt"), this.level);
+		saveWordInFile(biocoisoFolder.toString().concat("/protein.txt"), this.level);
 
-		File reactionFile = new File(biocoisoFolder.toString().concat("/reaction.txt"));
+		File reactionFile = new File(biocoisoFolder.toString().concat("/biomass.txt"));
 
-		File levelFile = new File(biocoisoFolder.toString().concat("/level.txt"));
+		File levelFile = new File(biocoisoFolder.toString().concat("/protein.txt"));
 
 
 		File modelFile = new File(biocoisoFolder.toString().concat("/model.xml"));
