@@ -28,6 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.sbml.jsbml.validator.SBMLValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,8 @@ import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceTableAIB;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.AIBenchUtils;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.TimeLeftProgress;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLWriter;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceEntity;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
@@ -53,6 +56,7 @@ import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelGenesServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.Enumerators.SequenceType;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
+import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 
@@ -476,18 +480,26 @@ public class BiocoisoRetriever implements Observer {
 
 		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
+		Container container = new Container(new ContainerBuilder(this.project.getName(), new Connection(this.msqlmt),"model_".concat(this.project.getName()),
+				ProjectServices.isCompartmentalisedModel(this.project.getDatabase().getDatabaseName()), false, this.project.getOrganismName(), "e-biomass"));
+		
+		SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(biocoisoFolder.toString().concat("/model.xml"), 
+				container, this.project.getTaxonomyID()+"", false, null, true, SBMLLevelVersion.L3V1, true);
+		
+		merlinSBML3Writer.writeToFile();
 
-		SBMLWriter sBMLWriter = new SBMLWriter(this.project.getName(), this.msqlmt, 
-				biocoisoFolder.toString().concat("/model.xml"),
-				project.getName(), 
-				ProjectServices.isCompartmentalisedModel(this.project.getDatabase().getDatabaseName()), 
-				false,
-				"e-Biomass", 
-				SBMLLevelVersion.L2V1);
 
-		sBMLWriter.getDataFromDatabase();
-
-		sBMLWriter.toSBML(true);
+//		SBMLWriter sBMLWriter = new SBMLWriter(this.project.getName(), this.msqlmt, 
+//				biocoisoFolder.toString().concat("/model.xml"),
+//				project.getName(), 
+//				ProjectServices.isCompartmentalisedModel(this.project.getDatabase().getDatabaseName()), 
+//				false,
+//				"e-Biomass", 
+//				SBMLLevelVersion.L2V1);
+//
+//		sBMLWriter.getDataFromDatabase();
+//
+//		sBMLWriter.toSBML(true);
 
 
 		saveWordInFile(biocoisoFolder.toString().concat("/biomass.txt"), this.reaction);
