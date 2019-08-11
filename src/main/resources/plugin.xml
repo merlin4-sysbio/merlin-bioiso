@@ -12,7 +12,7 @@
 			name="aibench.core.operation-definition"
 			class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.BiocoisoRetriever">
 			<operation-description name="BioCoISO"
-				path="50@model/" uid="operations.BioCoISO.ID" />
+				path="40@validation/" uid="operations.BioCoISO.ID" />
 		</extension>
 
 		<extension uid="aibench.workbench"
@@ -34,7 +34,10 @@
 				datatype="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB"
 				class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoisoAIBView" />
 				<!-- class="pt.uminho.ceb.biosystems.merlin.aibench.views.WorkspaceGenericEntityDataView" /> -->
-				
+		</extension>
+		<extension uid="aibench.workbench"
+			name="aibench.workbench.view">
+			<menu-icon menu="validation" icon="conf/icons/validation.png" />
 		</extension>
 	</extensions>
 </plugin>
