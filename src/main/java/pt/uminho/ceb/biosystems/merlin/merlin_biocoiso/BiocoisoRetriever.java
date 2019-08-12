@@ -87,9 +87,7 @@ public class BiocoisoRetriever implements Observer {
 
 	@Port(direction=Direction.INPUT, name="Reaction",description="", order = 2)
 	public void setReaction (String reaction){
-
-		this.reaction=reaction;
-
+		this.reaction=reaction.replaceAll("^(R_)", "");
 	}
 
 	@Port(direction=Direction.INPUT, name="Level",description="", order = 3)
@@ -474,6 +472,11 @@ public class BiocoisoRetriever implements Observer {
 
 		File biocoisoFolder = new File(getWorkDirectory().concat("/biocoiso"));
 
+		File model = new File(biocoisoFolder.toString().concat("/model.xml"));
+		
+		if(model.exists()) {
+			FileUtils.delete(model);
+		}
 		if(biocoisoFolder.exists()) {
 			FileUtils.deleteDirectory(biocoisoFolder);
 		}
@@ -481,10 +484,10 @@ public class BiocoisoRetriever implements Observer {
 		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
 		Container container = new Container(new ContainerBuilder(this.project.getName(), new Connection(this.msqlmt),"model_".concat(this.project.getName()),
-				ProjectServices.isCompartmentalisedModel(this.project.getDatabase().getDatabaseName()), false, this.project.getOrganismName(), "e_Biomass_cyto"));
+				ProjectServices.isCompartmentalisedModel(this.project.getName()), false, "", "e-biomass"));
 		
-		SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(biocoisoFolder.toString().concat("/model.xml"), 
-				container, this.project.getTaxonomyID()+"", false, null, true, SBMLLevelVersion.L3V1, true);
+		SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(model.getAbsolutePath(), 
+				container, "", false, null, true, SBMLLevelVersion.L3V1, true);
 		
 		merlinSBML3Writer.writeToFile();
 
