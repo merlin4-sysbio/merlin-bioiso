@@ -201,7 +201,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		String path = FileUtils.getWorkspaceTaxonomyFolderPath(workspace.getName(), workspace.getTaxonomyID());
 		File biocoisoFile = new File(path.concat("biocoiso"));
 
-		SBMLWriter sBMLWriter = null;
+//		SBMLWriter sBMLWriter = null;
 		try {
 			biocoisoFile.mkdir();
 			

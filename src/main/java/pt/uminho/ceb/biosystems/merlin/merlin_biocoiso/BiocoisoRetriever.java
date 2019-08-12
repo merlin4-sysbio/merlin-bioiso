@@ -88,7 +88,7 @@ public class BiocoisoRetriever implements Observer {
 	@Port(direction=Direction.INPUT, name="Reaction",description="", order = 2)
 	public void setReaction (String reaction){
 
-		this.reaction=reaction;
+		this.reaction=reaction.replaceAll("^(R_)", "");
 
 	}
 
