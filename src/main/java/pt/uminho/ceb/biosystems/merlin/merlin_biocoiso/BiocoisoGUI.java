@@ -37,9 +37,14 @@ import pt.uminho.ceb.biosystems.merlin.aibench.gui.CustomGUI;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.AIBenchUtils;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.CreateImageIcon;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLWriter;
+import pt.uminho.ceb.biosystems.merlin.database.connector.datatypes.Connection;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
+import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
+import pt.uminho.ceb.biosystems.mew.biocomponents.container.components.ReactionCI;
 
 /**
  * @author João Capela
@@ -200,20 +205,28 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		try {
 			biocoisoFile.mkdir();
 			
-			sBMLWriter = new SBMLWriter(workspace.getName(), workspace.getDatabase().getDatabaseAccess(), 
-					biocoisoFile.toString().concat("/model.xml"),
-					workspace.getName(),
-					ProjectServices.isCompartmentalisedModel(workspace.getDatabase().getDatabaseName()), 
-					false,
-					"e-Biomass", 
-					SBMLLevelVersion.L2V1);
+//			sBMLWriter = new SBMLWriter(workspace.getName(), workspace.getDatabase().getDatabaseAccess(), 
+//					biocoisoFile.toString().concat("/model.xml"),
+//					workspace.getName(),
+//					ProjectServices.isCompartmentalisedModel(workspace.getDatabase().getDatabaseName()), 
+//					false,
+//					"e-Biomass", 
+//					SBMLLevelVersion.L2V1);
+//			
+//			
+//			sBMLWriter.getDataFromDatabase();
+//			
+//			sBMLWriter.toSBML(true);
 			
+			Container container = new Container(new ContainerBuilder(workspace.getName(), new Connection(workspace.getDatabase().getDatabaseAccess()),"model_".concat(workspace.getName()),
+					ProjectServices.isCompartmentalisedModel(workspace.getName()), false, "", "e-biomass"));
 			
-			sBMLWriter.getDataFromDatabase();
+			SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(biocoisoFile.toString().concat("/model.xml"), 
+					container, "", false, null, true, SBMLLevelVersion.L3V1, true);
 			
-			sBMLWriter.toSBML(true);
+			merlinSBML3Writer.writeToFile();
 			
-			Map<String, String> dictionary = sBMLWriter.getReactionLabels();
+			Map<String, ReactionCI> dictionary = merlinSBML3Writer.getContainer().getReactions();
 			
 			String[] reactions = dictionary.keySet().toArray(new String[dictionary.size()]);
 			
