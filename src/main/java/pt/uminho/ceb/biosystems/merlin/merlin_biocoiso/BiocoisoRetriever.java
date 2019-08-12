@@ -481,7 +481,7 @@ public class BiocoisoRetriever implements Observer {
 		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
 		Container container = new Container(new ContainerBuilder(this.project.getName(), new Connection(this.msqlmt),"model_".concat(this.project.getName()),
-				ProjectServices.isCompartmentalisedModel(this.project.getDatabase().getDatabaseName()), false, this.project.getOrganismName(), "e-biomass"));
+				ProjectServices.isCompartmentalisedModel(this.project.getDatabase().getDatabaseName()), false, this.project.getOrganismName(), "e_Biomass_cyto"));
 		
 		SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(biocoisoFolder.toString().concat("/model.xml"), 
 				container, this.project.getTaxonomyID()+"", false, null, true, SBMLLevelVersion.L3V1, true);
