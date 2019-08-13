@@ -479,7 +479,12 @@ public class BiocoisoRetriever implements Observer {
 			FileUtils.delete(model);
 		}
 		if(biocoisoFolder.exists()) {
-			FileUtils.deleteDirectory(biocoisoFolder);
+			
+			try {
+				FileUtils.deleteDirectory(biocoisoFolder);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		biocoisoFolder.mkdir(); //creation of a directory to put the required files
