@@ -99,24 +99,28 @@ public class BiocoisoUtilities {
 			}
 		}; 
 
-		Map<?,?> nextLevel = (Map<?, ?>) ((Map<?, ?>) level.get(metabolite)).get("next");
 
-		@SuppressWarnings("unchecked")
-		Set<String> next = (Set<String>) nextLevel.keySet();
-		for (String key : next) {
+		for (Object met : level.keySet()) {
 
-			Map<?, ?> level2 = (Map<?, ?>) ((Map<?, ?>) nextLevel.get(key));
+			Map<?,?>  nextMap = (Map<?, ?>) level.get(met);
 
-			String[] res = createLineFromMap(level2,key);
+			Map<?,?> nextLevel = (Map<?, ?>) nextMap.get("next");
 
-			newTable.addLine(res);
+			@SuppressWarnings("unchecked")
+			Set<String> next = (Set<String>) nextLevel.keySet();
+			for (String key : next) {
 
+				Map<?, ?> level2 = (Map<?, ?>) ((Map<?, ?>) nextLevel.get(key));
+
+				String[] res = createLineFromMap(level2,key);
+
+				newTable.addLine(res);
+
+			}
+			Pair<WorkspaceGenericDataTable, Map<?,?>> res = new Pair<WorkspaceGenericDataTable, Map<?,?>>(newTable,nextLevel);
+			return res;
 		}
-
-		Pair<WorkspaceGenericDataTable, Map<?,?>> res = new Pair<WorkspaceGenericDataTable, Map<?,?>>(newTable,nextLevel);
-
-		return res;
-
+		return null;
 	}
 
 }
