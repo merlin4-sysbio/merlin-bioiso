@@ -47,7 +47,7 @@ import pt.uminho.ceb.biosystems.merlin.database.connector.datatypes.Connection;
 import pt.uminho.ceb.biosystems.merlin.database.connector.datatypes.DatabaseAccess;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
-import pt.uminho.ceb.biosystems.merlin.services.model.ModelGenesServices;
+import pt.uminho.ceb.biosystems.merlin.services.model.ModelSequenceServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.Enumerators.SequenceType;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
@@ -184,7 +184,7 @@ public class BiocoisoRetriever implements Observer {
 
 			try {
 
-				if(!ModelGenesServices.checkGenomeSequences(workspaceName, SequenceType.PROTEIN)) {
+				if(!ModelSequenceServices.checkGenomeSequences(workspaceName, SequenceType.PROTEIN)) {
 					throw new IllegalArgumentException("please set the project fasta ('.faa' or '.fna') files");
 				}
 				else if(this.project.getTaxonomyID()<0) {
