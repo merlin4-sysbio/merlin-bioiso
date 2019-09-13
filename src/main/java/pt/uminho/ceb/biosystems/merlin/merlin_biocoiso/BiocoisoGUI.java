@@ -57,7 +57,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 	private ExtendedJComboBox<String> objective ;
 	private ExtendedJComboBox<String> models ;
-	private JTextField level;
+	private JTextField depth;
 	private ParamsReceiver rec;
 
 	protected Object project;
@@ -91,8 +91,8 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 			workspaces[i] = (cl.get(i).getName());
 		}
 		this.models = new ExtendedJComboBox<String>(workspaces);
-		this.objective = new ExtendedJComboBox<String>(new String[0]);
-		this.level = new JTextField();
+		this.objective = new ExtendedJComboBox<String>(new String[0]);;
+		this.depth = new JTextField("2");
 		if(this.models.getModel().getSize()>0)
 			this.setReactions();
 
@@ -126,7 +126,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 						new ParamSpec[]{
 								new ParamSpec("Workspace", String.class,models.getSelectedItem().toString(),null),
 								new ParamSpec("Reaction", String.class,objective.getSelectedItem().toString(),null),
-								new ParamSpec("Level", String.class, level.getText(), null)
+								new ParamSpec("Level", String.class, depth.getText(), null)
 								
 								
 						}
@@ -171,22 +171,25 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	private InputParameter[] getInputParameters() {
 		InputParameter[] parameters = new InputParameter[3];
 		parameters[0] = 
+
 				new InputParameter(
 						"Workspace", 
 						models, 
-						""
+						"Select the workspace"
 						);
-		parameters[2] = 
-				new InputParameter(
-						"Level",
-						level,
-						""
-						);
+
 		parameters[1] = 
 				new InputParameter(
 						"Reaction", 
 						objective, 
-						""
+						"Reaction to be studied"
+						);
+		
+		parameters[2] = 
+				new InputParameter(
+						"Depth",
+						depth,
+						"Range of search of the algorithm"
 						);
 		
 		
