@@ -39,7 +39,6 @@ import pt.uminho.ceb.biosystems.merlin.aibench.utilities.CreateImageIcon;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
-import pt.uminho.ceb.biosystems.merlin.database.connector.datatypes.Connection;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
@@ -220,7 +219,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 //			
 //			sBMLWriter.toSBML(true);
 			
-			Container container = new Container(new ContainerBuilder(workspace.getName(), new Connection(workspace.getDatabase().getDatabaseAccess()),"model_".concat(workspace.getName()),
+			Container container = new Container(new ContainerBuilder(workspace.getName(), "model_".concat(workspace.getName()),
 					ProjectServices.isCompartmentalisedModel(workspace.getName()), false, "", "e-biomass"));
 			
 			SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(biocoisoFile.toString().concat("/model.xml"), 

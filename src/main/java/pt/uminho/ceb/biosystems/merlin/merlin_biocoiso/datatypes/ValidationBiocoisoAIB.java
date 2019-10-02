@@ -15,14 +15,12 @@ import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceTableAIB;
 import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.interfaces.IEntityAIB;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
-import pt.uminho.ceb.biosystems.merlin.database.connector.datatypes.Connection;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoiso;
 
 @Datatype(structure= Structure.SIMPLE, namingMethod="getName",removable=true,removeMethod ="remove")
 public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntityAIB{
 
 	private String workspaceName;
-	private Connection connection;
 	private Map<?, ?> nextLevel;
 
 
@@ -34,7 +32,6 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 		super(dbt, name);
 		workspaceName = dbt.getWorkspaceName();
-		this.connection = dbt.getConnection();
 	}
 
 	
@@ -43,7 +40,6 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		super(dbt, name);
 		this.nextLevel = nextLevel;
 		workspaceName = dbt.getWorkspaceName();
-		this.connection = dbt.getConnection();
 	}
 	
 	
@@ -154,20 +150,5 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		}
 		return res;
 	}
-
-
-	@Override
-	public Connection getConnection() {
-		// TODO Auto-generated method stub
-		return this.connection;
-	}
-
-	@Override
-	public void setConnection(Connection connection) {
-		this.connection = connection;
-		// TODO Auto-generated method stub
-
-	}
-
 
 }

@@ -43,12 +43,10 @@ import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceEntity;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
-import pt.uminho.ceb.biosystems.merlin.database.connector.datatypes.Connection;
-import pt.uminho.ceb.biosystems.merlin.database.connector.datatypes.DatabaseAccess;
+import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.SequenceType;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelSequenceServices;
-import pt.uminho.ceb.biosystems.merlin.utilities.Enumerators.SequenceType;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
@@ -71,7 +69,6 @@ public class BiocoisoRetriever implements Observer {
 	public static final String BIOCOISO_FILE_NAME = "biocoiso";
 	private String biocoisoResultsFile;
 	private String reaction;
-	private DatabaseAccess msqlmt;
 	final static Logger logger = LoggerFactory.getLogger(BiocoisoRetriever.class);
 	boolean biomass;
 	private Map<?,?> resultMap;
@@ -128,7 +125,6 @@ public class BiocoisoRetriever implements Observer {
 
 		this.project = AIBenchUtils.getProject(projectName);
 
-		this.msqlmt = this.project.getDatabase().getDatabaseAccess();
 
 	}
 
@@ -140,15 +136,11 @@ public class BiocoisoRetriever implements Observer {
 
 		String[] columnsName = new String[] {"info","metabolite","flux", "children", "description"};
 
-		WorkspaceTableAIB table = new WorkspaceTableAIB(name, columnsName , this.project.getName(), new Connection(this.project.getDatabase().getDatabaseAccess()));
+		WorkspaceTableAIB table = new WorkspaceTableAIB(name, columnsName , this.project.getName());
 
 		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), Arrays.asList(columnsName), this.project.getName(), name);
 
 		ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name, filledTableAndNextLevel.getB());
-
-		Connection connection = new Connection(this.msqlmt);
-
-		biocoiso.setConnection(connection); 
 
 		biocoiso.setWorkspace(this.project);
 
@@ -347,7 +339,7 @@ public class BiocoisoRetriever implements Observer {
 	 * @return a {@code String} with the path for the working directory
 	 */
 	private  String getWorkDirectory() {
-		String database = this.project.getDatabase().getDatabaseName();
+		String database = this.project.getDatabase().getWorkspaceName();
 
 		Long taxonomyID= this.project.getTaxonomyID();
 
@@ -483,7 +475,7 @@ public class BiocoisoRetriever implements Observer {
 
 		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
-		Container container = new Container(new ContainerBuilder(this.project.getName(), new Connection(this.msqlmt),"model_".concat(this.project.getName()),
+		Container container = new Container(new ContainerBuilder(this.project.getName(), "model_".concat(this.project.getName()),
 				ProjectServices.isCompartmentalisedModel(this.project.getName()), false, "", "e-biomass"));
 		
 		SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(model.getAbsolutePath(), 
