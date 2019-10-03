@@ -62,7 +62,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 		if(super.getMainTableData()==null) {
 
-			this.mainTableData = new WorkspaceGenericDataTable(Arrays.asList(this.getDbt().getColumms()), workspaceName, this.name);
+			this.mainTableData = new WorkspaceGenericDataTable(null, workspaceName, this.name);
 			//this.mainTableData.addLine(line);
 			super.setMainTableData(mainTableData);
 		}

@@ -136,7 +136,7 @@ public class BiocoisoRetriever implements Observer {
 
 		String[] columnsName = new String[] {"info","metabolite","flux", "children", "description"};
 
-		WorkspaceTableAIB table = new WorkspaceTableAIB(name, columnsName , this.project.getName());
+		WorkspaceTableAIB table = new WorkspaceTableAIB(name, this.project.getName());
 
 		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), Arrays.asList(columnsName), this.project.getName(), name);
 
