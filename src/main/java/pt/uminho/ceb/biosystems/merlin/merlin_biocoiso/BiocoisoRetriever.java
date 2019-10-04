@@ -154,13 +154,6 @@ public class BiocoisoRetriever implements Observer {
 
 		biocoiso.setData(filledTableAndNextLevel.getA());
 
-		//		ArrayList<WorkspaceEntity> newList = new ArrayList<WorkspaceEntity>();
-		//
-		//		for (WorkspaceEntity entity : this.project.getDatabase().getValidation().getEntities()) {
-		//			newList.add(entity);
-		//		}
-		//
-		//		newList.add(biocoiso);
 
 		try {
 
@@ -228,13 +221,13 @@ public class BiocoisoRetriever implements Observer {
 	 */
 	public boolean submitFiles() throws Exception {
 
-		List<File> requiredFiles = creationOfRequiredFiles();
+		File model = creationOfRequiredFiles();
 
-		if (requiredFiles == null) {
+		if (model == null) {
 			return false;
 		}
 
-		HandlingRequestsAndRetrievalsBiocoiso post = new HandlingRequestsAndRetrievalsBiocoiso(requiredFiles);
+		HandlingRequestsAndRetrievalsBiocoiso post = new HandlingRequestsAndRetrievalsBiocoiso(model, this.reaction, this.objective);
 
 		String submissionID = "";
 
@@ -479,25 +472,24 @@ public class BiocoisoRetriever implements Observer {
 	 * @return List<File> with the required files.
 	 * @throws Exception
 	 */
-	private List<File> creationOfRequiredFiles() throws Exception {
+	private File creationOfRequiredFiles() throws Exception {
 
-		List<File> requiredFiles = new ArrayList<>();
 
 		File biocoisoFolder = new File(getWorkDirectory().concat("/biocoiso"));
 
-		//		File model = new File(biocoisoFolder.toString().concat("/model.xml"));
+		File model = new File(biocoisoFolder.toString().concat("/model.xml"));
 
-		//		if(model.exists()) {
-		//			FileUtils.delete(model);
-		//		}
-		//		if(biocoisoFolder.exists()) {
-		//
-		//			try {
-		//				FileUtils.deleteDirectory(biocoisoFolder);
-		//			} catch (Exception e) {
-		//				e.printStackTrace();
-		//			}
-		//		}
+		if(model.exists()) {
+			FileUtils.delete(model);
+		}
+		if(biocoisoFolder.exists()) {
+
+			try {
+				FileUtils.deleteDirectory(biocoisoFolder);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		//
 		//		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
@@ -523,25 +515,11 @@ public class BiocoisoRetriever implements Observer {
 		//		sBMLWriter.toSBML(true);
 
 
-		saveWordInFile(biocoisoFolder.toString().concat("/reaction.txt"), this.reaction);
-
-		saveWordInFile(biocoisoFolder.toString().concat("/objective_direction.txt"), this.objective);
-
-		File reactionFile = new File(biocoisoFolder.toString().concat("/reaction.txt"));
-
 		File modelFile = new File(biocoisoFolder.toString().concat("/model.xml"));
 
-		File objectiveFile = new File(biocoisoFolder.toString().concat("/objective_direction.txt"));
+		if (modelFile.exists() ) {
 
-		if (modelFile.exists() && reactionFile.exists() && objectiveFile.exists()) {
-
-			requiredFiles.add(reactionFile);
-
-			requiredFiles.add(modelFile);
-
-			requiredFiles.add(objectiveFile);
-
-			return requiredFiles;
+			return modelFile;
 
 		}
 		else

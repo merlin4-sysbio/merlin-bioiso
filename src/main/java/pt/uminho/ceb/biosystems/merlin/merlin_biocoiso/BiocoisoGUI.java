@@ -10,6 +10,7 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -242,7 +243,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 			SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(biocoisoFile.toString().concat("/model.xml"), 
 					container, "", false, null, true, SBMLLevelVersion.L3V1, true);
 			
-			merlinSBML3Writer.writeToFile();
+//			merlinSBML3Writer.writeToFile();
 			
 			Map<String, ReactionCI> dictionary = merlinSBML3Writer.getContainer().getReactions();
 			
@@ -251,10 +252,27 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 			reaction.setModel(new DefaultComboBoxModel<>(reactions));
 			
 //			System.out.println("------" + reactions);
+			
+//			String databaseName = workspace.getDatabase().getWorkspaceName();
 //			
-//			String databaseName = workspace.getDatabase().getDatabaseName();
+//			Set<String> reactionsNames = ModelReactionsServices.getAllReactionsNames(databaseName);
 //			
-//			System.out.println(ModelReactionsServices.getAllReactionsNames(databaseName));
+//			for (String reactionName : reactionsNames) {
+//				
+//				int reactionId = ModelReactionsServices.getReactionID(reactionName, databaseName).get(0);
+//				
+//				System.out.println("----");
+//				
+//				System.out.println(reactionName);
+//				
+//				System.out.println(ModelReactionsServices.getReactionCompartment(databaseName, reactionId).getAbbreviation());
+//				
+//				
+//				
+//			}
+			
+			
+			System.out.println();
 			
 		}
 		catch (Exception e1) {

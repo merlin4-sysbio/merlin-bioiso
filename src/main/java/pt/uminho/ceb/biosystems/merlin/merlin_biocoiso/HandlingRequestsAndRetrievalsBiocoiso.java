@@ -32,11 +32,19 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 
 	final static Logger logger = LoggerFactory.getLogger(HandlingRequestsAndRetrievalsBiocoiso.class);
 	
-	private final List<File> requiredFiles;
+	private File model;
 
-	public HandlingRequestsAndRetrievalsBiocoiso(List<File> requiredFiles){
+	private String reaction;
 
-		this.requiredFiles = requiredFiles;
+	private String objective;
+
+	public HandlingRequestsAndRetrievalsBiocoiso(File model, String reaction, String objective){
+
+		this.setModel(model);
+		
+		this.reaction=reaction;
+		
+		this.objective=objective;
 		
 
 	}
@@ -50,7 +58,7 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 	 */
 	public String postFiles() throws IOException, InterruptedException {
 
-		String uploadUrl = URL.concat("/submit");
+		String uploadUrl = URL.concat("/submit/"+reaction+"/"+objective);
 
 
 		String charset = "UTF-8";
@@ -70,8 +78,8 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 				OutputStream output = connection.getOutputStream();
 				PrintWriter writer = new PrintWriter(new OutputStreamWriter(output, charset), true);
 				) {
-			for (File file : this.requiredFiles){
-				logger.info("File path coiser: " + file.getAbsolutePath());
+			
+				logger.info("File path coiser: " + model.getAbsolutePath());
 				// Send normal param.
 				writer.append("--" + boundary).append(CRLF);
 				writer.append("Content-Disposition: form-data; name=\"param\"").append(CRLF);
@@ -79,13 +87,13 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 				writer.append(CRLF).append(param).append(CRLF).flush();
 
 				writer.append("--" + boundary).append(CRLF);
-				writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"" + file.getName() + "\"").append(CRLF);
+				writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"" + model.getName() + "\"").append(CRLF);
 				writer.append("Content-Type: text/plain; charset=" + charset).append(CRLF); // Text file itself must be saved in this charset!
 				writer.append(CRLF).flush();
-				Files.copy(file.toPath(), output);
+				Files.copy(model.toPath(), output);
 				output.flush(); // Important before continuing with writer!
 				writer.append(CRLF).flush();
-			}
+			
 
 			writer.append("--" + boundary + "--").append(CRLF).flush();
 		}
@@ -213,6 +221,14 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 			return false;
 
 		}
+	}
+
+	public File getModel() {
+		return model;
+	}
+
+	public void setModel(File model) {
+		this.model = model;
 	}
 
 
