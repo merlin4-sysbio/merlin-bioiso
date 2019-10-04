@@ -58,8 +58,7 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 	 */
 	public String postFiles() throws IOException, InterruptedException {
 
-		String uploadUrl = URL.concat("/submit/"+reaction+"/"+objective);
-
+		String uploadUrl = URL.concat("/submitMerlinPlugin/"+reaction+"/"+objective);
 
 		String charset = "UTF-8";
 		String param = "value";
@@ -157,7 +156,7 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 
 		String uploadUrl = URL.concat("/status");
 
-		uploadUrl = uploadUrl.concat("/"+submissionID);
+		uploadUrl = uploadUrl.concat("/"+submissionID+"/True");
 
 		URL url = new URL(uploadUrl);
 

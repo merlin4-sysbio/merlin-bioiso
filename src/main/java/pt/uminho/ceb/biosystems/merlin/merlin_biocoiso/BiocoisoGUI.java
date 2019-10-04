@@ -42,6 +42,7 @@ import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVer
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLWriter;
+import pt.uminho.ceb.biosystems.merlin.core.containers.model.ReactionContainer;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelReactionsServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
@@ -210,7 +211,6 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		String path = FileUtils.getWorkspaceTaxonomyFolderPath(workspace.getName(), workspace.getTaxonomyID());
 		File biocoisoFile = new File(path.concat("biocoiso"));
 
-//		SBMLWriter sBMLWriter = null;
 		try {
 			
 			if(biocoisoFile.exists()) {
@@ -224,19 +224,6 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 			
 			biocoisoFile.mkdir();
 			
-//			sBMLWriter = new SBMLWriter(workspace.getName(), workspace.getDatabase().getDatabaseAccess(), 
-//					biocoisoFile.toString().concat("/model.xml"),
-//					workspace.getName(),
-//					ProjectServices.isCompartmentalisedModel(workspace.getDatabase().getDatabaseName()), 
-//					false,
-//					"e-Biomass", 
-//					SBMLLevelVersion.L2V1);
-//			
-//			
-//			sBMLWriter.getDataFromDatabase();
-//			
-//			sBMLWriter.toSBML(true);
-			
 			Container container = new Container(new ContainerBuilder(workspace.getName(), "model_".concat(workspace.getName()),
 					ProjectServices.isCompartmentalisedModel(workspace.getName()), false, "", "e-biomass"));
 			
@@ -249,14 +236,14 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 			
 			String[] reactions = dictionary.keySet().toArray(new String[dictionary.size()]);
 			
+//			System.out.println("tamanho:"+reactions.length);
 			reaction.setModel(new DefaultComboBoxModel<>(reactions));
-			
-//			System.out.println("------" + reactions);
 			
 //			String databaseName = workspace.getDatabase().getWorkspaceName();
 //			
-//			Set<String> reactionsNames = ModelReactionsServices.getAllReactionsNames(databaseName);
+//			List<ReactionContainer> reactionsNames = ModelReactionsServices.getReactions(databaseName, ProjectServices.isCompartmentalisedModel(workspace.getName()));
 //			
+//			System.out.println("--------tamanho: " + reactionsNames.size());
 //			for (String reactionName : reactionsNames) {
 //				
 //				int reactionId = ModelReactionsServices.getReactionID(reactionName, databaseName).get(0);
@@ -265,14 +252,10 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 //				
 //				System.out.println(reactionName);
 //				
-//				System.out.println(ModelReactionsServices.getReactionCompartment(databaseName, reactionId).getAbbreviation());
-//				
-//				
+//				System.out.println(ModelReactionsServices.getReactionCompartment(databaseName, reactionId));
 //				
 //			}
 			
-			
-			System.out.println();
 			
 		}
 		catch (Exception e1) {
@@ -283,12 +266,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		
 	
 	}
-//
-//	public void fill () {
-//		for (String obj : reactions) {
-//			objective.setSelectedItem(obj);
-//		}
-//	}
+
 	@Override
 	public void setVisible(boolean b) {
 		this.pack();

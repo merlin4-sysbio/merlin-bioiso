@@ -45,11 +45,16 @@ import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceAIB;
 import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceTableAIB;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.AIBenchUtils;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.TimeLeftProgress;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.SequenceType;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
+import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelSequenceServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
+import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 
@@ -82,7 +87,7 @@ public class BiocoisoRetriever implements Observer {
 	public void setReaction (String reaction) throws Exception{
 
 		this.reaction=reaction.replaceAll("^(R_)", "");
-	}
+	}	
 
 	@Port(direction=Direction.INPUT, name="Objective",description="", order = 3)
 	public void setObjective (String objective) throws Exception{
@@ -95,11 +100,9 @@ public class BiocoisoRetriever implements Observer {
 
 		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 4, "submitting files...");
 
-
 		boolean submitted = submitFiles();
 
 		if (submitted && !this.cancel.get()) {
-
 
 			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 4, "Rendering results...");
 
@@ -115,7 +118,7 @@ public class BiocoisoRetriever implements Observer {
 		else {
 			Workbench.getInstance().error("error while doing the operation! please try again");
 
-
+			//			executeOperation();
 		}
 	}
 
@@ -134,7 +137,7 @@ public class BiocoisoRetriever implements Observer {
 
 		String name = Integer.toString(table_number) + " - " + this.reaction;
 
-		String[] columnsName = new String[] {"info","metabolite", "reaction", "side" , "production"};
+		String[] columnsName = new String[] {"info","metabolite", "reactions", "role" , "analysis"};
 
 		WorkspaceTableAIB table = new WorkspaceTableAIB(name, columnsName , this.project.getName());
 
@@ -143,7 +146,7 @@ public class BiocoisoRetriever implements Observer {
 						Arrays.asList(columnsName), this.project.getName(), name);
 
 		//		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
-		//				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso_2.json", 
+		//				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso.json", 
 		//						Arrays.asList(columnsName), this.project.getName(), name);
 
 		ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name, filledTableAndNextLevel.getB());
@@ -249,6 +252,8 @@ public class BiocoisoRetriever implements Observer {
 					while (responseCode!=200 &&  !this.cancel.get()) {
 
 						responseCode = post.getStatus(submissionID);
+
+						System.out.println(responseCode);
 
 						if(responseCode == -1) {  
 							logger.error("Error!");
@@ -474,7 +479,6 @@ public class BiocoisoRetriever implements Observer {
 	 */
 	private File creationOfRequiredFiles() throws Exception {
 
-
 		File biocoisoFolder = new File(getWorkDirectory().concat("/biocoiso"));
 
 		File model = new File(biocoisoFolder.toString().concat("/model.xml"));
@@ -490,16 +494,8 @@ public class BiocoisoRetriever implements Observer {
 				e.printStackTrace();
 			}
 		}
-		//
-		//		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
-		//		Container container = new Container(new ContainerBuilder(this.project.getName(), new Connection(this.msqlmt),"model_".concat(this.project.getName()),
-		//				ProjectServices.isCompartmentalisedModel(this.project.getName()), false, "", "e-biomass"));
-		//
-		//		SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(model.getAbsolutePath(), 
-		//				container, "", false, null, true, SBMLLevelVersion.L3V1, true);
-		//
-		//		merlinSBML3Writer.writeToFile();
+		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
 
 		//		SBMLWriter sBMLWriter = new SBMLWriter(this.project.getName(), this.msqlmt, 
@@ -514,12 +510,18 @@ public class BiocoisoRetriever implements Observer {
 		//
 		//		sBMLWriter.toSBML(true);
 
+		Container container = new Container(new ContainerBuilder(this.project.getName(), "model_".concat(this.project.getName()),
+				ProjectServices.isCompartmentalisedModel(this.project.getName()), false, "", "e-biomass"));
 
-		File modelFile = new File(biocoisoFolder.toString().concat("/model.xml"));
+		SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(biocoisoFolder.toString().concat("/model.xml"), 
+				container, "", false, null, true, SBMLLevelVersion.L3V1, true);
 
-		if (modelFile.exists() ) {
+		merlinSBML3Writer.writeToFile();
 
-			return modelFile;
+
+		if (model.exists() ) {
+
+			return model;
 
 		}
 		else

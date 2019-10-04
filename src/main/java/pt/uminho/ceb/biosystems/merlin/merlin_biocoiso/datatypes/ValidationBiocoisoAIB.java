@@ -101,7 +101,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 			WorkspaceDataTable[] results = new WorkspaceDataTable[1];
 
-			String[] columnsNames = new String[] {"metabolite","side", "reaction", "reactants", "products","production"};
+			String[] columnsNames = new String[] {"metabolite","side", "reaction", "reactants", "products","analysis"};
 
 			results[0] = new WorkspaceDataTable(columnsNames, "reactions");
 
@@ -112,11 +112,17 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 				@SuppressWarnings("unchecked")
 				ArrayList<ArrayList<String>> reactions = (ArrayList<ArrayList<String>>) level2.get("children");
 				
-				for (ArrayList<String> reaction : reactions) {
+				for (int i=0; i<reactions.size();i++) {
+					
+					ArrayList<String> reaction = reactions.get(i);
 					
 					String reactionID = reaction.get(0);
 					
-					Object[] line = this.createLineFromMap(level2, key, reactionID); //key = udp-alpha 
+					ArrayList<String> reactantsList = ((ArrayList<ArrayList<ArrayList<String>>>) level2.get("children")).get(i).get(2);
+					
+					ArrayList<String> productsList = ((ArrayList<ArrayList<ArrayList<String>>>) level2.get("children")).get(i).get(3);
+					
+					Object[] line = this.createLineFromMap(level2, key, reactionID,reactantsList, productsList); //key = udp-alpha 
 
 					results[0].addLine(line);
 					
@@ -133,7 +139,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 
 
-	private Object[] createLineFromMap(Map<?,?> keyMap, String key, String reactionID) {
+	private Object[] createLineFromMap(Map<?,?> keyMap, String key, String reactionID, ArrayList<String> reactantsList, ArrayList<String> productsList) {
 		Object[] res = new Object[6];
 		
 		res[0]=key;
@@ -147,7 +153,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		res[2]=reactionID;
 		
 		@SuppressWarnings("unchecked")
-		ArrayList<String> reactantsList = ((ArrayList<ArrayList<ArrayList<String>>>) keyMap.get("children")).get(0).get(2);
+		
 		
 		String reactants = "";
 
@@ -166,7 +172,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		res[3] = reactants;
 		
 		@SuppressWarnings("unchecked")
-		ArrayList<String> productsList = ((ArrayList<ArrayList<ArrayList<String>>>) keyMap.get("children")).get(0).get(3);
+		
 		
 		String products = "";
 
