@@ -14,6 +14,8 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +26,9 @@ import org.slf4j.LoggerFactory;
  */
 public class HandlingRequestsAndRetrievalsBiocoiso {
 
-	private static final String URL = "https://biocoiso.bio.di.uminho.pt";
+//	private static final String URL = "https://biocoiso.bio.di.uminho.pt";
+	
+	private static final String URL = "http://palsson.di.uminho.pt:7474";
 
 	final static Logger logger = LoggerFactory.getLogger(HandlingRequestsAndRetrievalsBiocoiso.class);
 	

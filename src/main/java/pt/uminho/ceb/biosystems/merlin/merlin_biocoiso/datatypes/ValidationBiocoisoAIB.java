@@ -1,11 +1,15 @@
 package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes;
 
+import java.awt.Image;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 import org.json.simple.parser.ParseException;
 
@@ -22,6 +26,8 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 	private String workspaceName;
 	private Map<?, ?> nextLevel;
+	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Ok.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 
 
 	/**
@@ -62,7 +68,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 		if(super.getMainTableData()==null) {
 
-			this.mainTableData = new WorkspaceGenericDataTable(null, workspaceName, this.name);
+			this.mainTableData = new WorkspaceGenericDataTable(Arrays.asList(this.getDbt().getColumms()), workspaceName, this.name);
 			//this.mainTableData.addLine(line);
 			super.setMainTableData(mainTableData);
 		}
@@ -88,21 +94,35 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 		if(super.getRowInfo()==null || refresh) {
 			
-			Map<?,?> nextTable = (Map<?,?>) ((Map<?,?>) nextLevel.get(metabolite)).get("next");
+			Map<?,?> nextTable = (Map<?,?>) ((Map<?,?>) nextLevel.get(metabolite)).get("next"); //level 2 udp-alpha...
 
 			@SuppressWarnings("unchecked")
 			Set<String> keys = (Set<String>) nextTable.keySet();
 
 			WorkspaceDataTable[] results = new WorkspaceDataTable[1];
 
-			String[] columnsNames = new String[] {"metabolite","flux", "children", "description"};
+			String[] columnsNames = new String[] {"metabolite","side", "reaction", "reactants", "products","production"};
 
 			results[0] = new WorkspaceDataTable(columnsNames, "reactions");
 
 			for (String key : keys) {
-				String[] line = this.createLineFromMap(nextTable, key);
+				
+				Map<?, ?> level2 =  (Map<?, ?>) ((Map<?,?>) nextTable.get(key)); //udp-alpha
 
-				results[0].addLine(line);
+				@SuppressWarnings("unchecked")
+				ArrayList<ArrayList<String>> reactions = (ArrayList<ArrayList<String>>) level2.get("children");
+				
+				for (ArrayList<String> reaction : reactions) {
+					
+					String reactionID = reaction.get(0);
+					
+					Object[] line = this.createLineFromMap(level2, key, reactionID); //key = udp-alpha 
+
+					results[0].addLine(line);
+					
+				}
+				
+				
 
 			}
 			super.setRowInfo(results);
@@ -113,42 +133,66 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 
 
-	private String[] createLineFromMap(Map<?,?> keyMap, String key) {
-		String[] res = new String[4];
+	private Object[] createLineFromMap(Map<?,?> keyMap, String key, String reactionID) {
+		Object[] res = new Object[6];
 		
-		Map<?, ?> level2 =  (Map<?, ?>) ((Map<?,?>) keyMap.get(key));
-
 		res[0]=key;
 
-		res[1]= level2.get("flux").toString();
-
-
+		boolean production = (boolean) keyMap.get("flux");
+		
+		String side = (String) keyMap.get("side");
+		
+		res[1] = side;
+		
+		res[2]=reactionID;
+		
 		@SuppressWarnings("unchecked")
-		ArrayList<String> childrenList = (ArrayList<String>) level2.get("children");
-
-		String children = "";
+		ArrayList<String> reactantsList = ((ArrayList<ArrayList<ArrayList<String>>>) keyMap.get("children")).get(0).get(2);
+		
+		String reactants = "";
 
 		int i = 0;
 
-		while (i<childrenList.size()) {
-			if (i==childrenList.size()-1) {
-				children = children + childrenList.get(i);
+		while (i<reactantsList.size()) {
+			if (i==reactantsList.size()-1) {
+				reactants = reactants + reactantsList.get(i);
 			}
 			else {
-				children = children + childrenList.get(i) + ", ";
+				reactants = reactants + reactantsList.get(i) + ", ";
 			}
 			i++;
 		}
+		
+		res[3] = reactants;
+		
+		@SuppressWarnings("unchecked")
+		ArrayList<String> productsList = ((ArrayList<ArrayList<ArrayList<String>>>) keyMap.get("children")).get(0).get(3);
+		
+		String products = "";
 
-		res[2]=children;
+		i = 0;
 
-		if (Float.parseFloat(res[1]) >0) {
-			res[3] = "OK, this metabolite is being produced";
+		while (i<productsList.size()) {
+			if (i==productsList.size()-1) {
+				products = products + productsList.get(i);
+			}
+			else {
+				products = products + productsList.get(i) + ", ";
+			}
+			i++;
+		}
+		
+		res[4] = products;
+
+		if (production) {
+			res[5] = produced;
 		}
 		else {
-			res[3] = "To review. This metabolite is not being produced";
+			res[5] = notProduced;
 		}
 		return res;
 	}
+
+
 
 }

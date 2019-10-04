@@ -1,6 +1,7 @@
 package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
 
 
+import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,9 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -28,6 +33,8 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import es.uvigo.ei.aibench.core.Core;
+import es.uvigo.ei.aibench.core.clipboard.ClipboardItem;
 import es.uvigo.ei.aibench.core.operation.annotation.Cancel;
 import es.uvigo.ei.aibench.core.operation.annotation.Direction;
 import es.uvigo.ei.aibench.core.operation.annotation.Operation;
@@ -38,17 +45,11 @@ import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceAIB;
 import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceTableAIB;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.AIBenchUtils;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.TimeLeftProgress;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
-import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceEntity;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.SequenceType;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
-import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelSequenceServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
-import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 
@@ -56,7 +57,7 @@ import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
  * @author João Capela
  *
  */
-@Operation(name="BioCoISO",description="Get results from BioCoISO")
+@Operation(name="BioISO",description="Get results from BioISO")
 public class BiocoisoRetriever implements Observer {
 
 	private WorkspaceAIB project;
@@ -70,30 +71,31 @@ public class BiocoisoRetriever implements Observer {
 	private String biocoisoResultsFile;
 	private String reaction;
 	final static Logger logger = LoggerFactory.getLogger(BiocoisoRetriever.class);
-	boolean biomass;
 	private Map<?,?> resultMap;
-	private String level;
+	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Ok.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	private String objective;
 
 
 
 	@Port(direction=Direction.INPUT, name="Reaction",description="", order = 2)
-	public void setReaction (String reaction){
+	public void setReaction (String reaction) throws Exception{
 
 		this.reaction=reaction.replaceAll("^(R_)", "");
 	}
 
-	@Port(direction=Direction.INPUT, name="Level",description="", order = 3)
-	public void setLevel (String level) throws Exception{
+	@Port(direction=Direction.INPUT, name="Objective",description="", order = 3)
+	public void setObjective (String objective) throws Exception{
 
-		this.level=level;
-		
-		//creationOfRequiredFiles();
+		this.objective=objective;
+
+		creationOfRequiredFiles();
 
 		this.startTime = GregorianCalendar.getInstance().getTimeInMillis();
 
 		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 4, "submitting files...");
 
-		
+
 		boolean submitted = submitFiles();
 
 		if (submitted && !this.cancel.get()) {
@@ -113,11 +115,10 @@ public class BiocoisoRetriever implements Observer {
 		else {
 			Workbench.getInstance().error("error while doing the operation! please try again");
 
-			executeOperation();
 
 		}
-
 	}
+
 
 	@Port(direction=Direction.INPUT, name="Workspace",description="select the new model workspace",validateMethod="checkNewProject", order = 1)
 	public void setNewProject(String projectName) throws Exception {
@@ -125,20 +126,25 @@ public class BiocoisoRetriever implements Observer {
 
 		this.project = AIBenchUtils.getProject(projectName);
 
-
 	}
 
 	private void executeOperation() throws IOException, ParseException {
-		
+
 		int table_number = this.project.getDatabase().getValidation().getEntities().size() + 1;
 
-		String name = "BioCoISO_" + Integer.toString(table_number);
+		String name = Integer.toString(table_number) + " - " + this.reaction;
 
-		String[] columnsName = new String[] {"info","metabolite","flux", "children", "description"};
+		String[] columnsName = new String[] {"info","metabolite", "reaction", "side" , "production"};
 
-		WorkspaceTableAIB table = new WorkspaceTableAIB(name, this.project.getName());
+		WorkspaceTableAIB table = new WorkspaceTableAIB(name, columnsName , this.project.getName());
 
-		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), Arrays.asList(columnsName), this.project.getName(), name);
+		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
+				this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
+						Arrays.asList(columnsName), this.project.getName(), name);
+
+		//		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
+		//				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso_2.json", 
+		//						Arrays.asList(columnsName), this.project.getName(), name);
 
 		ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name, filledTableAndNextLevel.getB());
 
@@ -148,16 +154,36 @@ public class BiocoisoRetriever implements Observer {
 
 		biocoiso.setData(filledTableAndNextLevel.getA());
 
-		ArrayList<WorkspaceEntity> newList = new ArrayList<WorkspaceEntity>();
+		//		ArrayList<WorkspaceEntity> newList = new ArrayList<WorkspaceEntity>();
+		//
+		//		for (WorkspaceEntity entity : this.project.getDatabase().getValidation().getEntities()) {
+		//			newList.add(entity);
+		//		}
+		//
+		//		newList.add(biocoiso);
 
-		for (WorkspaceEntity entity : this.project.getDatabase().getValidation().getEntities()) {
-			newList.add(entity);
+		try {
+
+			this.project.getValidation().addEntity(biocoiso);
+
 		}
 
-		newList.add(biocoiso);
+		catch (Exception e) {
 
-		this.project.getDatabase().getValidation().setEntities(newList);
-		
+			List<WorkspaceAIB> wspList = AIBenchUtils.getAllProjects();
+
+			for (WorkspaceAIB wsp : wspList) {
+
+				ClipboardItem item = Core.getInstance().getClipboard().getClipboardItem(wsp);
+
+				Core.getInstance().getClipboard().removeClipboardItem(item);
+
+				Core.getInstance().getClipboard().putItem(wsp, item.getName());
+
+			}
+		}
+		//		this.project.getDatabase().getValidation().setEntities(newList);
+
 	}
 
 	//////////////////////////ValidateMethods/////////////////////////////
@@ -459,71 +485,67 @@ public class BiocoisoRetriever implements Observer {
 
 		File biocoisoFolder = new File(getWorkDirectory().concat("/biocoiso"));
 
-		File model = new File(biocoisoFolder.toString().concat("/model.xml"));
-		
-		if(model.exists()) {
-			FileUtils.delete(model);
-		}
-		if(biocoisoFolder.exists()) {
-			
-			try {
-				FileUtils.deleteDirectory(biocoisoFolder);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		//		File model = new File(biocoisoFolder.toString().concat("/model.xml"));
 
-		biocoisoFolder.mkdir(); //creation of a directory to put the required files
+		//		if(model.exists()) {
+		//			FileUtils.delete(model);
+		//		}
+		//		if(biocoisoFolder.exists()) {
+		//
+		//			try {
+		//				FileUtils.deleteDirectory(biocoisoFolder);
+		//			} catch (Exception e) {
+		//				e.printStackTrace();
+		//			}
+		//		}
+		//
+		//		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
-		Container container = new Container(new ContainerBuilder(this.project.getName(), "model_".concat(this.project.getName()),
-				ProjectServices.isCompartmentalisedModel(this.project.getName()), false, "", "e-biomass"));
-		
-		SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(model.getAbsolutePath(), 
-				container, "", false, null, true, SBMLLevelVersion.L3V1, true);
-		
-		merlinSBML3Writer.writeToFile();
-
-
-//		SBMLWriter sBMLWriter = new SBMLWriter(this.project.getName(), this.msqlmt, 
-//				biocoisoFolder.toString().concat("/model.xml"),
-//				project.getName(), 
-//				ProjectServices.isCompartmentalisedModel(this.project.getDatabase().getDatabaseName()), 
-//				false,
-//				"e-Biomass", 
-//				SBMLLevelVersion.L2V1);
-//
-//		sBMLWriter.getDataFromDatabase();
-//
-//		sBMLWriter.toSBML(true);
+		//		Container container = new Container(new ContainerBuilder(this.project.getName(), new Connection(this.msqlmt),"model_".concat(this.project.getName()),
+		//				ProjectServices.isCompartmentalisedModel(this.project.getName()), false, "", "e-biomass"));
+		//
+		//		SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(model.getAbsolutePath(), 
+		//				container, "", false, null, true, SBMLLevelVersion.L3V1, true);
+		//
+		//		merlinSBML3Writer.writeToFile();
 
 
-		saveWordInFile(biocoisoFolder.toString().concat("/biomass.txt"), this.reaction);
+		//		SBMLWriter sBMLWriter = new SBMLWriter(this.project.getName(), this.msqlmt, 
+		//				biocoisoFolder.toString().concat("/model.xml"),
+		//				project.getName(), 
+		//				ProjectServices.isCompartmentalisedModel(this.project.getDatabase().getDatabaseName()), 
+		//				false,
+		//				"e-Biomass", 
+		//				SBMLLevelVersion.L2V1);
+		//
+		//		sBMLWriter.getDataFromDatabase();
+		//
+		//		sBMLWriter.toSBML(true);
 
-		saveWordInFile(biocoisoFolder.toString().concat("/protein.txt"), this.level);
 
-		File reactionFile = new File(biocoisoFolder.toString().concat("/biomass.txt"));
+		saveWordInFile(biocoisoFolder.toString().concat("/reaction.txt"), this.reaction);
 
-		File levelFile = new File(biocoisoFolder.toString().concat("/protein.txt"));
+		saveWordInFile(biocoisoFolder.toString().concat("/objective_direction.txt"), this.objective);
 
+		File reactionFile = new File(biocoisoFolder.toString().concat("/reaction.txt"));
 
 		File modelFile = new File(biocoisoFolder.toString().concat("/model.xml"));
 
-		if (modelFile.exists() && reactionFile.exists() && levelFile.exists()) {
+		File objectiveFile = new File(biocoisoFolder.toString().concat("/objective_direction.txt"));
+
+		if (modelFile.exists() && reactionFile.exists() && objectiveFile.exists()) {
 
 			requiredFiles.add(reactionFile);
 
-			requiredFiles.add(levelFile);
-
 			requiredFiles.add(modelFile);
+
+			requiredFiles.add(objectiveFile);
 
 			return requiredFiles;
 
 		}
 		else
 			return null;
-
-
-
 
 	}
 
@@ -584,7 +606,7 @@ public class BiocoisoRetriever implements Observer {
 	 * @throws ParseException 
 	 */
 
-	public Pair<WorkspaceGenericDataTable, Map<?,?>> createDataTable(String file, List<String> columnsNames, String name, String windowName) throws IOException, ParseException {
+	private Pair<WorkspaceGenericDataTable, Map<?,?>> createDataTable(String file, List<String> columnsNames, String name, String windowName) throws IOException, ParseException {
 
 		JSONParser jsonParser = new JSONParser();
 
@@ -595,13 +617,93 @@ public class BiocoisoRetriever implements Observer {
 
 			JSONObject jo = (JSONObject) obj; 
 			this.resultMap = (Map<?, ?>) jo; //level 1
-			Pair<WorkspaceGenericDataTable, Map<?,?>> tableAndNextLevel = BiocoisoUtilities.tableCreator(resultMap, name, windowName, "M_fictitious");
-			
+			Pair<WorkspaceGenericDataTable, Map<?,?>> tableAndNextLevel = this.tableCreator(resultMap, name, windowName, "M_fictitious");
+
 			return tableAndNextLevel;
 		}}
-	
 
-	
+
+	private Pair<WorkspaceGenericDataTable, Map<?,?>> tableCreator(Map<?,?> level, String name, String windowName, String metabolite) {
+
+		String[] columnsName = new String[] {"info","metabolite", "reaction", "side", "production"};
+
+		WorkspaceGenericDataTable newTable = new WorkspaceGenericDataTable(Arrays.asList(columnsName) , name , windowName) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean isCellEditable(int row, int col){
+				if (col==0)
+				{
+					return true;
+				}
+				else return false;
+			}
+		}; 
+
+
+		for (Object met : level.keySet()) {
+
+			Map<?,?>  nextMap = (Map<?, ?>) level.get(met);
+
+			Map<?,?> nextLevel = (Map<?, ?>) nextMap.get("next");
+
+			@SuppressWarnings("unchecked")
+			Set<String> next = (Set<String>) nextLevel.keySet();
+			for (String key : next) {
+
+				Map<?, ?> level2 = (Map<?, ?>) ((Map<?, ?>) nextLevel.get(key));
+
+				Object[] res = createLineFromMap(level2,key);
+
+				newTable.addLine(res);
+
+			}
+			Pair<WorkspaceGenericDataTable, Map<?,?>> res = new Pair<WorkspaceGenericDataTable, Map<?,?>>(newTable,nextLevel);
+			return res;
+		}
+		return null;
+	}
+
+	private Object[] createLineFromMap(Map<?,?> keyMap, String key) {
+
+		Object[] res = new Object[5];
+
+		res[1]=key;
+
+		boolean flux = (boolean) keyMap.get("flux");
+
+		@SuppressWarnings("unchecked")
+		ArrayList<ArrayList<String>> childrenList = (ArrayList<ArrayList<String>>) keyMap.get("children");
+
+		String children = "";
+
+		int i = 0;
+
+		while (i<childrenList.size()) {
+			if (i==childrenList.size()-1) {
+				children = children + childrenList.get(i).get(0);
+			}
+			else {
+				children = children + childrenList.get(i).get(0) + ", ";
+			}
+			i++;
+		}
+
+		res[2]=children;
+
+		res[3]=keyMap.get("side");
+
+		if (flux) {
+			res[4] = produced;
+		}
+		else {
+			res[4] = notProduced;
+		}
+		return res;
+	}
+
+
+
 	/**
 	 * @return the progress
 	 */
