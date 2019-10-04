@@ -67,7 +67,7 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 				PrintWriter writer = new PrintWriter(new OutputStreamWriter(output, charset), true);
 				) {
 			for (File file : this.requiredFiles){
-				logger.info("File path coiser: " + file.getAbsolutePath());
+				logger.info("File path: " + file.getAbsolutePath());
 				// Send normal param.
 				writer.append("--" + boundary).append(CRLF);
 				writer.append("Content-Disposition: form-data; name=\"param\"").append(CRLF);
