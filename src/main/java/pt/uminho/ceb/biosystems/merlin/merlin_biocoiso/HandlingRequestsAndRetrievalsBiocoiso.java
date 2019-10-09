@@ -12,9 +12,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
-import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -77,7 +74,6 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 				OutputStream output = connection.getOutputStream();
 				PrintWriter writer = new PrintWriter(new OutputStreamWriter(output, charset), true);
 				) {
-			
 				logger.info("File path: " + model.getAbsolutePath());
 				// Send normal param.
 				writer.append("--" + boundary).append(CRLF);
