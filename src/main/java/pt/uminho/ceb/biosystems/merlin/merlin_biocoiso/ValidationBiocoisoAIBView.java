@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.EventObject;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -239,8 +240,8 @@ public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
 			
 			this.infoSelectedRow = jTable.getSelectedRow();
 
-			new GenericDetailWindow(table, dataTable.getWindowName(), 
-					entity.getSingular() + jTable.getValueAt(jTable.getSelectedRow(),1));
+			new BiocoisoDetailWindow(table, (String) jTable.getValueAt(jTable.getSelectedRow(),1), 
+					"metabolite: " + jTable.getValueAt(jTable.getSelectedRow(),1));
 		} 
 		catch (Exception e) {
 			Workbench.getInstance().error(e);

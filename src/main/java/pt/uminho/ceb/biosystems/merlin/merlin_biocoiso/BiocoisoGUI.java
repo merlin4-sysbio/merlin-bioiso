@@ -10,11 +10,13 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -39,7 +41,10 @@ import pt.uminho.ceb.biosystems.merlin.aibench.utilities.CreateImageIcon;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLWriter;
+import pt.uminho.ceb.biosystems.merlin.core.containers.model.ReactionContainer;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
+import pt.uminho.ceb.biosystems.merlin.services.model.ModelReactionsServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
 import pt.uminho.ceb.biosystems.mew.biocomponents.container.components.ReactionCI;
@@ -53,9 +58,9 @@ import pt.uminho.ceb.biosystems.mew.biocomponents.container.components.ReactionC
 public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	private static final long serialVersionUID = 1L;
 
-	private ExtendedJComboBox<String> objective ;
+	private ExtendedJComboBox<String> reaction ;
 	private ExtendedJComboBox<String> models ;
-	private JTextField depth;
+	private ExtendedJComboBox<String> objective;
 	private ParamsReceiver rec;
 
 	protected Object project;
@@ -89,10 +94,18 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 			workspaces[i] = (cl.get(i).getName());
 		}
 		this.models = new ExtendedJComboBox<String>(workspaces);
-		this.objective = new ExtendedJComboBox<String>(new String[0]);;
-		this.depth = new JTextField("2");
+		this.objective = new ExtendedJComboBox<String>(new String[0]);
+		
+		
+		this.reaction = new ExtendedJComboBox<String>(new String[0]);;
 		if(this.models.getModel().getSize()>0)
 			this.setReactions();
+		
+		String[] items = {
+				"maximize",
+				"minimize", 
+		};
+		this.objective.setModel(new DefaultComboBoxModel<>(items));
 
 		this.models.addItemListener(new ItemListener() {
 
@@ -120,13 +133,12 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				dispose();
+				
 				rec.paramsIntroduced(
 						new ParamSpec[]{
 								new ParamSpec("Workspace", String.class,models.getSelectedItem().toString(),null),
-								new ParamSpec("Reaction", String.class,objective.getSelectedItem().toString(),null),
-								new ParamSpec("Level", String.class, depth.getText(), null)
-								
-								
+								new ParamSpec("Reaction", String.class,reaction.getSelectedItem().toString(),null),
+								new ParamSpec("Objective", String.class,objective.getSelectedItem().toString(),null)
 						}
 						);
 				
@@ -179,19 +191,16 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		parameters[1] = 
 				new InputParameter(
 						"Reaction", 
-						objective, 
+						reaction, 
 						"Reaction to be studied"
 						);
-		
 		parameters[2] = 
 				new InputParameter(
-						"Depth",
-						depth,
-						"Range of search of the algorithm"
+						"Objective", 
+						objective, 
+						"Objective"
 						);
 		
-		
-
 		return parameters;
 	}
 
@@ -202,22 +211,18 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		String path = FileUtils.getWorkspaceTaxonomyFolderPath(workspace.getName(), workspace.getTaxonomyID());
 		File biocoisoFile = new File(path.concat("biocoiso"));
 
-//		SBMLWriter sBMLWriter = null;
 		try {
-			biocoisoFile.mkdir();
 			
-//			sBMLWriter = new SBMLWriter(workspace.getName(), workspace.getDatabase().getDatabaseAccess(), 
-//					biocoisoFile.toString().concat("/model.xml"),
-//					workspace.getName(),
-//					ProjectServices.isCompartmentalisedModel(workspace.getDatabase().getDatabaseName()), 
-//					false,
-//					"e-Biomass", 
-//					SBMLLevelVersion.L2V1);
-//			
-//			
-//			sBMLWriter.getDataFromDatabase();
-//			
-//			sBMLWriter.toSBML(true);
+			if(biocoisoFile.exists()) {
+
+				try {
+					FileUtils.deleteDirectory(biocoisoFile);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+			
+			biocoisoFile.mkdir();
 			
 			Container container = new Container(new ContainerBuilder(workspace.getName(), "model_".concat(workspace.getName()),
 					ProjectServices.isCompartmentalisedModel(workspace.getName()), false, "", "e-biomass"));
@@ -225,13 +230,33 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 			SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(biocoisoFile.toString().concat("/model.xml"), 
 					container, "", false, null, true, SBMLLevelVersion.L3V1, true);
 			
-			merlinSBML3Writer.writeToFile();
+//			merlinSBML3Writer.writeToFile();
 			
 			Map<String, ReactionCI> dictionary = merlinSBML3Writer.getContainer().getReactions();
 			
 			String[] reactions = dictionary.keySet().toArray(new String[dictionary.size()]);
 			
-			objective.setModel(new DefaultComboBoxModel<>(reactions));
+//			System.out.println("tamanho:"+reactions.length);
+			reaction.setModel(new DefaultComboBoxModel<>(reactions));
+			
+//			String databaseName = workspace.getDatabase().getWorkspaceName();
+//			
+//			List<ReactionContainer> reactionsNames = ModelReactionsServices.getReactions(databaseName, ProjectServices.isCompartmentalisedModel(workspace.getName()));
+//			
+//			System.out.println("--------tamanho: " + reactionsNames.size());
+//			for (String reactionName : reactionsNames) {
+//				
+//				int reactionId = ModelReactionsServices.getReactionID(reactionName, databaseName).get(0);
+//				
+//				System.out.println("----");
+//				
+//				System.out.println(reactionName);
+//				
+//				System.out.println(ModelReactionsServices.getReactionCompartment(databaseName, reactionId));
+//				
+//			}
+			
+			
 		}
 		catch (Exception e1) {
 
@@ -241,12 +266,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		
 	
 	}
-//
-//	public void fill () {
-//		for (String obj : reactions) {
-//			objective.setSelectedItem(obj);
-//		}
-//	}
+
 	@Override
 	public void setVisible(boolean b) {
 		this.pack();
