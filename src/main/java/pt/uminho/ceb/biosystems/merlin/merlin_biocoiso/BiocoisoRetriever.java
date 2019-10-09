@@ -58,7 +58,7 @@ import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 
-/**Aibench operation for BioCoISO
+/**Aibench operation for BioISO
  * @author João Capela
  *
  */
@@ -106,9 +106,9 @@ public class BiocoisoRetriever implements Observer {
 
 			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 4, "Rendering results...");
 
-			logger.info("The files for BioCoISO were submitted successfully");
+			logger.info("The files for BioISO were submitted successfully");
 
-			Workbench.getInstance().info("The files for BioCoISO were submitted successfully");
+			Workbench.getInstance().info("The files for BioISO were submitted successfully");
 
 			executeOperation();
 		}
@@ -217,7 +217,7 @@ public class BiocoisoRetriever implements Observer {
 
 	/////////////////////////////////////////////////////
 
-	/**This method allows the submission of the required files for BioCoISO into the web server, the download of the results and the verification 
+	/**This method allows the submission of the required files for BioISO into the web server, the download of the results and the verification 
 	 * of the md5 key as well as show error and warning messages
 	 * @return boolean informing whether the submission went well or not.
 	 * @throws Exception 
@@ -276,7 +276,7 @@ public class BiocoisoRetriever implements Observer {
 					}
 
 
-					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 2, 4, "downloading BioCoISO results");
+					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 2, 4, "downloading BioISO results");
 
 					if(!this.cancel.get())
 						verify = post.downloadFile(submissionID, getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME).concat("/results.zip"));
@@ -473,7 +473,7 @@ public class BiocoisoRetriever implements Observer {
 	}
 
 	/**
-	 * This method generates the required files for BioCoISO to run. A file with the biomass reaction id, another with the protein's name and the model.
+	 * This method generates the required files for BioISO to run. A file with the biomass reaction id, another with the protein's name and the model.
 	 * @return List<File> with the required files.
 	 * @throws Exception
 	 */
@@ -576,7 +576,7 @@ public class BiocoisoRetriever implements Observer {
 	}
 
 	/**
-	 * This method creates the data table with the results. This table will be rendered in BioCoISO's view.
+	 * This method creates the data table with the results. This table will be rendered in BioISO's view.
 	 * @param file
 	 * @param columnsNames
 	 * @param name
@@ -605,7 +605,7 @@ public class BiocoisoRetriever implements Observer {
 
 	private Pair<WorkspaceGenericDataTable, Map<?,?>> tableCreator(Map<?,?> level, String name, String windowName, String metabolite) {
 
-		String[] columnsName = new String[] {"info","metabolite", "reaction", "side", "production"};
+		String[] columnsName = new String[] {"info","metabolite", "reaction", "role", "analysis"};
 
 		WorkspaceGenericDataTable newTable = new WorkspaceGenericDataTable(Arrays.asList(columnsName) , name , windowName) {
 			private static final long serialVersionUID = 1L;
@@ -687,7 +687,7 @@ public class BiocoisoRetriever implements Observer {
 	/**
 	 * @return the progress
 	 */
-	@Progress(progressDialogTitle = "BioCoISO", modal = false, workingLabel = "BioCoISO is running...", preferredWidth = 400, preferredHeight=300)
+	@Progress(progressDialogTitle = "BioISO", modal = false, workingLabel = "BioISO is running...", preferredWidth = 400, preferredHeight=300)
 	public TimeLeftProgress getProgress() {
 
 		return progress;
