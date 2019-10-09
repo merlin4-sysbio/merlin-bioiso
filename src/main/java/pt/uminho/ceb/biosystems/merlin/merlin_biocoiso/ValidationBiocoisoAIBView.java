@@ -14,7 +14,6 @@ import java.util.Calendar;
 import java.util.EventObject;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -27,16 +26,15 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumnModel;
 
 import es.uvigo.ei.aibench.workbench.Workbench;
-import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.interfaces.IEntityAIB;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.ButtonColumn;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.CreateImageIcon;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.ExportToXLS;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.MyJTable;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.SearchInTable;
 import pt.uminho.ceb.biosystems.merlin.aibench.views.WorkspaceUpdatablePanel;
-import pt.uminho.ceb.biosystems.merlin.aibench.views.windows.GenericDetailWindow;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
+import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 
 
 public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
@@ -46,7 +44,7 @@ public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
 	protected JPanel jPanel1;
 	protected JPanel jPanel2;
 	protected MyJTable jTable;
-	protected IEntityAIB entity;
+	protected ValidationBiocoisoAIB entity;
 	protected JPanel jPanel4;
 	protected JButton jButton1ExportTxt;
 	protected WorkspaceGenericDataTable dataTable;
@@ -57,7 +55,7 @@ public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
 	/**
 	 * 
 	 */
-	public ValidationBiocoisoAIBView(IEntityAIB entity) {
+	public ValidationBiocoisoAIBView(ValidationBiocoisoAIB entity) {
 		super();
 		// TODO Auto-generated constructor stub
 
@@ -239,9 +237,10 @@ public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
 			WorkspaceDataTable[] table = entity.getRowInfo(row, refresh);
 			
 			this.infoSelectedRow = jTable.getSelectedRow();
-
-			new BiocoisoDetailWindow(table, (String) jTable.getValueAt(jTable.getSelectedRow(),1), 
+			
+			new BiocoisoDetailWindow(this.entity, table, (String) jTable.getValueAt(jTable.getSelectedRow(),1), 
 					"metabolite: " + jTable.getValueAt(jTable.getSelectedRow(),1));
+			
 		} 
 		catch (Exception e) {
 			Workbench.getInstance().error(e);
@@ -250,7 +249,7 @@ public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
 	}
 
 	public String getSingular()  {
-		return "metabolite: ";
+		return "reaction: ";
 	}
 
 	@Override

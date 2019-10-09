@@ -26,6 +26,7 @@ public class ValidationBiocoiso extends WorkspaceEntity implements IEntity {
 	private HashMap<String, String> names;
 	protected WorkspaceGenericDataTable data;
 	private HashMap<Integer, Integer[]> searchData;
+	private WorkspaceDataTable[] reactionInfo;
 	
 	/**
 	 * @param dbt
@@ -76,6 +77,8 @@ public class ValidationBiocoiso extends WorkspaceEntity implements IEntity {
 	public void setSearchData(HashMap<Integer, Integer[]> searchData) {
 		this.searchData = searchData;
 	}
+
+	
 
 
 
