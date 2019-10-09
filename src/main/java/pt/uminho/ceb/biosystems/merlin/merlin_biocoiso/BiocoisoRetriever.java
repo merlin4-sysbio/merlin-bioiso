@@ -605,7 +605,7 @@ public class BiocoisoRetriever implements Observer {
 
 	private Pair<WorkspaceGenericDataTable, Map<?,?>> tableCreator(Map<?,?> level, String name, String windowName, String metabolite) {
 
-		String[] columnsName = new String[] {"info","metabolite", "reaction", "side", "production"};
+		String[] columnsName = new String[] {"info","metabolite", "reaction", "role", "analysis"};
 
 		WorkspaceGenericDataTable newTable = new WorkspaceGenericDataTable(Arrays.asList(columnsName) , name , windowName) {
 			private static final long serialVersionUID = 1L;

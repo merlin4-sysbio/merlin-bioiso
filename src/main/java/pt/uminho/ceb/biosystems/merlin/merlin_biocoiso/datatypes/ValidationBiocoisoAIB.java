@@ -101,7 +101,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 			WorkspaceDataTable[] results = new WorkspaceDataTable[1];
 
-			String[] columnsNames = new String[] {"metabolite","side", "reaction", "reactants", "products","analysis"};
+			String[] columnsNames = new String[] {"metabolite","role", "reaction", "reactants", "products","analysis"};
 
 			results[0] = new WorkspaceDataTable(columnsNames, "reactions");
 
