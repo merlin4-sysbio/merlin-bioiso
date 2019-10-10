@@ -5,8 +5,14 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.EventObject;
+import java.util.Map;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
@@ -16,15 +22,20 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.SoftBevelBorder;
 
 import es.uvigo.ei.aibench.workbench.Workbench;
 import es.uvigo.ei.aibench.workbench.utilities.Utilities;
+import pt.uminho.ceb.biosystems.merlin.aibench.utilities.ButtonColumn;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.MyJTable;
+import pt.uminho.ceb.biosystems.merlin.aibench.views.windows.GenericDetailWindow;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
+import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
+import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 
 public class BiocoisoDetailWindow extends javax.swing.JDialog{
-	
+
 	/**
 	 * 
 	 */
@@ -37,17 +48,38 @@ public class BiocoisoDetailWindow extends javax.swing.JDialog{
 	private JComboBox<String> searchComboBox;
 	private WorkspaceDataTable[] dataTable;
 	private String reaction;
+	private ButtonColumn buttonColumn;
+	private int infoSelectedRow;
+	private Map<String, ArrayList<ArrayList<String>>> mapReactionsAndCompounds;
+	private ValidationBiocoisoAIB entity;
+
+//	public BiocoisoDetailWindow(Map<String, ArrayList<ArrayList<String>>> mapReactionsAndCompounds, WorkspaceDataTable[] table, String windowName, String name) {
+//
+//		super(Workbench.getInstance().getMainFrame());
+//		this.dataTable = table;
+//		this.mapReactionsAndCompounds=mapReactionsAndCompounds;
+//		initGUI(table, windowName, name);
+//		Utilities.centerOnOwner(this);
+//		this.setIconImage((new ImageIcon(getClass().getClassLoader().getResource("icons/merlin.png"))).getImage());
+//		this.setVisible(true);		
+//		this.setAlwaysOnTop(true);
+//		this.toFront();
+//		
+//	}
 	
-	public BiocoisoDetailWindow(WorkspaceDataTable[] querydatas, String windowName, String name) {
+	public BiocoisoDetailWindow(ValidationBiocoisoAIB entity, WorkspaceDataTable[] table, String windowName, String name) {
+
 		super(Workbench.getInstance().getMainFrame());
-		this.dataTable = querydatas;
-		initGUI(querydatas, windowName, name);
+		this.dataTable = table;
+//		this.mapReactionsAndCompounds=mapReactionsAndCompounds;
+		this.entity=entity;
+		initGUI(table, windowName, name);
 		Utilities.centerOnOwner(this);
 		this.setIconImage((new ImageIcon(getClass().getClassLoader().getResource("icons/merlin.png"))).getImage());
 		this.setVisible(true);		
 		this.setAlwaysOnTop(true);
 		this.toFront();
-		// TODO Auto-generated constructor stub
+		
 	}
 	private void initGUI(WorkspaceDataTable[] querydatas, String windowName, String name) {
 
@@ -112,6 +144,28 @@ public class BiocoisoDetailWindow extends javax.swing.JDialog{
 			jTable1.setShowGrid(false);
 			jScrollPane1.setViewportView(jTable1);
 			jTable1.setModel(querydatas[0]);
+			buttonColumn =  new ButtonColumn(jTable1,0, new ActionListener(){
+				public void actionPerformed(ActionEvent arg0){
+					processButton(arg0);
+				} },
+					new MouseAdapter(){
+					public void mouseClicked(MouseEvent e) {
+						// {
+						// get the coordinates of the mouse click
+						Point p = e.getPoint();
+
+						// get the row index that contains that coordinate
+						int rowNumber = jTable1.rowAtPoint(p);
+						int  columnNumber = jTable1.columnAtPoint(p);
+						jTable1.setColumnSelectionInterval(columnNumber, columnNumber);
+						// Get the ListSelectionModel of the MyJTable
+						ListSelectionModel model = jTable1.getSelectionModel();
+						// set the selected interval of rows. Using the "rowNumber"
+						// variable for the beginning and end selects only that one row.
+						model.setSelectionInterval( rowNumber, rowNumber );
+						processButton(e);
+					}
+				}, new ArrayList<>());
 
 			c.insets = new Insets(0, 0, 0, 0);
 
@@ -132,7 +186,7 @@ public class BiocoisoDetailWindow extends javax.swing.JDialog{
 			GridBagConstraints c2 = new GridBagConstraints();
 
 			if(querydatas.length==1) {
-				
+
 				JButton button1 = new JButton("Close");
 				c2.weightx = 0.95;
 				c2.weighty = 1;
@@ -189,12 +243,45 @@ public class BiocoisoDetailWindow extends javax.swing.JDialog{
 			}
 
 			this.setModal(true);
-			this.setSize(750, 550);
+			this.setSize(600, 400);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
+	public void processButton(EventObject arg0) {
 
+		try {
+			JButton button = null;
+			if(arg0.getClass()==ActionEvent.class)
+				button = (JButton)((ActionEvent) arg0).getSource();
+
+			if(arg0.getClass()==MouseEvent.class)
+				button = (JButton) arg0.getSource();
+
+			button.setSelected(true);
+
+			ListSelectionModel model = jTable1.getSelectionModel();
+			model.setSelectionInterval( buttonColumn.getSelectIndex(button), buttonColumn.getSelectIndex(button));
+
+			int row = jTable1.getSelectedRow();
+
+			boolean refresh = (this.infoSelectedRow == jTable1.getSelectedRow());
+
+			String reactionID = (String) jTable1.getValueAt(jTable1.getSelectedRow(),1);
+
+			refresh = true;
+			
+			WorkspaceDataTable[] results = this.entity.getReactionInfo(reactionID, refresh);
+
+
+			new GenericDetailWindow(results, (String) jTable1.getValueAt(jTable1.getSelectedRow(),1), 
+					"reaction: " + jTable1.getValueAt(jTable1.getSelectedRow(),1));
+		} 
+		catch (Exception e) {
+			Workbench.getInstance().error(e);
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * 
 	 */

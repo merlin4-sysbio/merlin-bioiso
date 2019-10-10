@@ -5,13 +5,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 import org.json.simple.parser.ParseException;
+
 
 import es.uvigo.ei.aibench.core.datatypes.annotation.Datatype;
 import es.uvigo.ei.aibench.core.datatypes.annotation.Structure;
@@ -25,38 +26,46 @@ import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoiso;
 public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntityAIB{
 
 	private String workspaceName;
+	private Icon notProduced; 
+	private Icon produced;
+	private Icon dontknow;
 	private Map<?, ?> nextLevel;
-	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
-	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Ok.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	private Map<String, ArrayList<ArrayList<String>>> reactionsAndCompounds;
+	private String metabolite;
 
 
 	/**
 	 * @param dbt
 	 * @param name
 	 */
-	public ValidationBiocoisoAIB(WorkspaceTableAIB dbt, String name) {
+	//	public ValidationBiocoisoAIB(WorkspaceTableAIB dbt, String name) {
+	//
+	//		super(dbt, name);
+	//		workspaceName = dbt.getWorkspaceName();
+	//		notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	//		produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Ok.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	//	}
 
-		super(dbt, name);
-		workspaceName = dbt.getWorkspaceName();
-	}
 
-	
-	public ValidationBiocoisoAIB(WorkspaceTableAIB dbt, String name, Map<?,?> nextLevel) {
+	public ValidationBiocoisoAIB(WorkspaceTableAIB dbt, String name, Map<?, ?> nextLevel) {
 
 		super(dbt, name);
 		this.nextLevel = nextLevel;
 		workspaceName = dbt.getWorkspaceName();
+		notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+		produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Ok.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+		dontknow = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/question.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+		this.reactionsAndCompounds= new HashMap<String, ArrayList<ArrayList<String>>>();
 	}
-	
-	
+
+
+
+
 	/* (non-Javadoc)
 	 * @see datatypes.metabolic_regulatory.Entity#getStats()
 	 */
 	public String[][] getStats() {
 
-		if(super.getStats()==null) {
-
-		}
 
 		return super.getStats();
 	}
@@ -76,6 +85,107 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		return super.getMainTableData();
 	}
 
+
+	public WorkspaceDataTable[] getReactionInfo(String choosenReaction, boolean refresh) throws FileNotFoundException, IOException, ParseException{
+
+		refresh = true;
+
+		ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) ((Map<?,?>) nextLevel.get(metabolite)).get("children"); //list with reactions
+
+		WorkspaceDataTable[] results = new WorkspaceDataTable[1];
+
+		String[] columnsNames = new String[] {"metabolite", "role", "analysis"};
+
+		results[0] = new WorkspaceDataTable(columnsNames, "reactions") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean isCellEditable(int row, int col){
+				if (col==0)
+				{
+					return true;
+				}
+				else return false;
+			}};
+
+			boolean found =false;
+			int i = 0;
+
+			while (!found &&  i< reactions.size()) {
+
+				ArrayList<Object> reaction = reactions.get(i);
+
+				String reactionID =  (String) reaction.get(0); //r10856
+
+				if (choosenReaction.equals(reactionID)) {
+					found = true;
+					ArrayList<String> reactantsList = (ArrayList<String>) reaction.get(2);
+
+					ArrayList<String> productsList = (ArrayList<String>) reaction.get(3);
+
+					for ( String reactant : reactantsList) {
+						Object[] line = createLineFromProductOrReactant(this.metabolite, reactionID, reactant,"Reactant");
+						results[0].addLine(line);
+					}
+
+					for ( String product : productsList) {
+						Object[] line = createLineFromProductOrReactant(this.metabolite, reactionID, product,"Product");
+						results[0].addLine(line);
+					}
+				}
+
+				i++;
+
+			}
+
+			return results;
+	}
+
+	private Object[] createLineFromProductOrReactant(String metabolite, String reaction, String reactantOrProduct, String role) {
+
+		Map<?,?> precursors = (Map<?,?>) ((Map<?, ?>) nextLevel.get(metabolite)).get("next");
+
+		if (precursors.get(reactantOrProduct)!=null) {
+			boolean analysis =  (boolean) ((Map<?, ?>) precursors.get(reactantOrProduct)).get("flux");
+
+			Object[] res = new Object[4];
+
+			res[0]=reactantOrProduct;
+
+			res[1]= role;
+
+			if (analysis) {
+				res[2] = produced;
+			}
+			else {
+				res[2] = notProduced;
+			}
+			return res;
+
+		}
+
+		else {
+			Object[] res = new Object[3];
+
+			res[0]=reactantOrProduct;
+
+			res[1]= role;
+			
+			res[2] = dontknow;
+			
+			return res;
+		}
+	}
+
+	public Map<String, ArrayList<ArrayList<String>>> getReactionsAndCompounds(){
+		return (Map<String, ArrayList<ArrayList<String>>>) this.reactionsAndCompounds;
+	}
+
+	public void setReactionsAndCompounds(Map<String, ArrayList<ArrayList<String>>> newMap) {
+		this.reactionsAndCompounds = newMap;
+	}
+
+
 	/**
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
@@ -90,113 +200,89 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 		int row = identifier;
 
-		String metabolite = (String) myTable.getValueAt(row, 1);
+		this.metabolite = (String) myTable.getValueAt(row, 1);
 
 		if(super.getRowInfo()==null || refresh) {
-			
-			Map<?,?> nextTable = (Map<?,?>) ((Map<?,?>) nextLevel.get(metabolite)).get("next"); //level 2 udp-alpha...
 
-			@SuppressWarnings("unchecked")
-			Set<String> keys = (Set<String>) nextTable.keySet();
+			ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) ((Map<?,?>) nextLevel.get(metabolite)).get("children"); //list with reactions
 
 			WorkspaceDataTable[] results = new WorkspaceDataTable[1];
 
-			String[] columnsNames = new String[] {"metabolite","role", "reaction", "reactants", "products","analysis"};
+			String[] columnsNames = new String[] {"info","reaction", "reactants", "products", "analysis"};
 
-			results[0] = new WorkspaceDataTable(columnsNames, "reactions");
+			results[0] = new WorkspaceDataTable(columnsNames, "reactions") {
+				private static final long serialVersionUID = 1L;
 
-			for (String key : keys) {
-				
-				Map<?, ?> level2 =  (Map<?, ?>) ((Map<?,?>) nextTable.get(key)); //udp-alpha
+				@Override
+				public boolean isCellEditable(int row, int col){
+					if (col==0)
+					{
+						return true;
+					}
+					else return false;
+				}};
 
-				@SuppressWarnings("unchecked")
-				ArrayList<ArrayList<String>> reactions = (ArrayList<ArrayList<String>>) level2.get("children");
-				
-				for (int i=0; i<reactions.size();i++) {
-					
-					ArrayList<String> reaction = reactions.get(i);
-					
-					String reactionID = reaction.get(0);
-					
-					ArrayList<String> reactantsList = ((ArrayList<ArrayList<ArrayList<String>>>) level2.get("children")).get(i).get(2);
-					
-					ArrayList<String> productsList = ((ArrayList<ArrayList<ArrayList<String>>>) level2.get("children")).get(i).get(3);
-					
-					Object[] line = this.createLineFromMap(level2, key, reactionID,reactantsList, productsList); //key = udp-alpha 
+				for (ArrayList<Object> reaction : reactions) {
+
+					String reactionID =  (String) reaction.get(0); //r10856
+
+					boolean analysis = (boolean) reaction.get(1);
+
+					ArrayList<String> reactantsList = (ArrayList<String>) reaction.get(2);
+
+					ArrayList<String> productsList = (ArrayList<String>) reaction.get(3);
+
+					Object[] line = createLineFromMap(analysis, reactionID, reactantsList, productsList);
 
 					results[0].addLine(line);
-					
+
+					ArrayList<ArrayList<String>> res = new ArrayList<ArrayList<String>>();
+
+					res.add(reactantsList);
+
+					res.add(productsList);
+
+					this.reactionsAndCompounds.put(reactionID, res);
+
+
+
 				}
-				
-				
 
-			}
-			super.setRowInfo(results);
+				super.setRowInfo(results);
 		}
-
 		return super.getRowInfo();
-	} 
+	}
 
 
 
-	private Object[] createLineFromMap(Map<?,?> keyMap, String key, String reactionID, ArrayList<String> reactantsList, ArrayList<String> productsList) {
-		Object[] res = new Object[6];
-		
-		res[0]=key;
 
-		boolean production = (boolean) keyMap.get("flux");
-		
-		String side = (String) keyMap.get("side");
-		
-		res[1] = side;
-		
-		res[2]=reactionID;
-		
-		@SuppressWarnings("unchecked")
-		
-		
-		String reactants = "";
 
-		int i = 0;
+	private Object[] createLineFromMap(boolean analysis, String reactionID, ArrayList<String> reactantsList, ArrayList<String> productsList) {
+		Object[] res = new Object[5];
 
-		while (i<reactantsList.size()) {
-			if (i==reactantsList.size()-1) {
-				reactants = reactants + reactantsList.get(i);
-			}
-			else {
-				reactants = reactants + reactantsList.get(i) + ", ";
-			}
-			i++;
-		}
-		
-		res[3] = reactants;
-		
-		@SuppressWarnings("unchecked")
-		
-		
-		String products = "";
+		res[1]=reactionID;
 
-		i = 0;
+		res[2]= Integer.toString(reactantsList.size());
 
-		while (i<productsList.size()) {
-			if (i==productsList.size()-1) {
-				products = products + productsList.get(i);
-			}
-			else {
-				products = products + productsList.get(i) + ", ";
-			}
-			i++;
-		}
-		
-		res[4] = products;
+		res[3] = Integer.toString(productsList.size());
 
-		if (production) {
-			res[5] = produced;
+		if (analysis) {
+			res[4] = produced;
 		}
 		else {
-			res[5] = notProduced;
+			res[4] = notProduced;
 		}
 		return res;
+	}
+
+
+	public Map<?, ?> getNextLevel() {
+		return nextLevel;
+	}
+
+
+	public void setNextLevel(Map<?, ?> nextLevel) {
+		this.nextLevel = nextLevel;
 	}
 
 

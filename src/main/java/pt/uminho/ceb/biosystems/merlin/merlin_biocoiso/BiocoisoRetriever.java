@@ -90,35 +90,44 @@ public class BiocoisoRetriever implements Observer {
 	}	
 
 	@Port(direction=Direction.INPUT, name="Objective",description="", order = 3)
-	public void setObjective (String objective) throws Exception{
+	public void setObjective (String objective){
+		try {
+			this.objective=objective;
 
-		this.objective=objective;
+			creationOfRequiredFiles();
 
-		creationOfRequiredFiles();
+			this.startTime = GregorianCalendar.getInstance().getTimeInMillis();
 
-		this.startTime = GregorianCalendar.getInstance().getTimeInMillis();
+			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 4, "submitting files...");
 
-		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 4, "submitting files...");
 
-		boolean submitted = submitFiles();
+			boolean submitted = submitFiles();
 
-		if (submitted && !this.cancel.get()) {
+			if (submitted && !this.cancel.get()) {
 
-			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 4, "Rendering results...");
+				this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 4, "Rendering results...");
 
-			logger.info("The files for BioISO were submitted successfully");
+				logger.info("The files for BioISO were submitted successfully");
 
-			Workbench.getInstance().info("The files for BioISO were submitted successfully");
+				Workbench.getInstance().info("The files for BioISO were submitted successfully");
 
-			executeOperation();
+				executeOperation();
+			}
+			else if(this.cancel.get()) {
+				Workbench.getInstance().warn("operation canceled!");
+			}
+			else {
+
+				logger.error("");
+				Workbench.getInstance().error("error while doing the operation! please try again");
+
+//								executeOperation();
+			}
 		}
-		else if(this.cancel.get()) {
-			Workbench.getInstance().warn("operation canceled!");
-		}
-		else {
-			Workbench.getInstance().error("error while doing the operation! please try again");
-
-			//			executeOperation();
+		catch(Exception e) {
+			logger.error(e.getMessage());
+			Workbench.getInstance().error(e);
+			e.printStackTrace();
 		}
 	}
 
@@ -141,13 +150,13 @@ public class BiocoisoRetriever implements Observer {
 
 		WorkspaceTableAIB table = new WorkspaceTableAIB(name, columnsName , this.project.getName());
 
-		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
-				this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
-						Arrays.asList(columnsName), this.project.getName(), name);
+//				Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
+//						this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
+//								Arrays.asList(columnsName), this.project.getName(), name);
 
-		//		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
-		//				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso.json", 
-		//						Arrays.asList(columnsName), this.project.getName(), name);
+		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
+				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso_2.json", 
+						Arrays.asList(columnsName), this.project.getName(), name);
 
 		ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name, filledTableAndNextLevel.getB());
 
@@ -255,21 +264,22 @@ public class BiocoisoRetriever implements Observer {
 
 						System.out.println(responseCode);
 
-						if(responseCode == -1) {  
+						if(responseCode == -1) { 
 							logger.error("Error!");
-							System.exit(1);
+							throw new Exception("Error!");
+
 						}
 						else if (responseCode==503) {
-							Workbench.getInstance().warn("The server cannot handle the submission due to capacity overload. Please try again later!");
-							System.exit(1);
+							logger.error("The server cannot handle the submission due to capacity overload. Please try again later!");
+							throw new Exception("The server cannot handle the submission due to capacity overload. Please try again later!");
 						}
 						else if (responseCode==500) {
-							Workbench.getInstance().warn("Something went wrong while processing the request, please try again");
-							System.exit(1);
+							logger.error("Something went wrong while processing the request, please try again");
+							throw new Exception("Something went wrong while processing the request, please try again");
 						}
 						else if (responseCode == 400) {
-							Workbench.getInstance().warn("The submitted files are fewer than expected");
-							System.exit(1);
+							logger.error("The submitted files are fewer than expected");
+							throw new Exception("The submitted files are fewer than expected");
 						}
 
 						TimeUnit.SECONDS.sleep(3);
@@ -348,7 +358,7 @@ public class BiocoisoRetriever implements Observer {
 
 			}
 			else
-				logger.error("No dockerID attributed!");
+				throw new Exception("No dockerID attributed!");
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
@@ -497,19 +507,6 @@ public class BiocoisoRetriever implements Observer {
 
 		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
-
-		//		SBMLWriter sBMLWriter = new SBMLWriter(this.project.getName(), this.msqlmt, 
-		//				biocoisoFolder.toString().concat("/model.xml"),
-		//				project.getName(), 
-		//				ProjectServices.isCompartmentalisedModel(this.project.getDatabase().getDatabaseName()), 
-		//				false,
-		//				"e-Biomass", 
-		//				SBMLLevelVersion.L2V1);
-		//
-		//		sBMLWriter.getDataFromDatabase();
-		//
-		//		sBMLWriter.toSBML(true);
-
 		Container container = new Container(new ContainerBuilder(this.project.getName(), "model_".concat(this.project.getName()),
 				ProjectServices.isCompartmentalisedModel(this.project.getName()), false, "", "e-biomass"));
 
@@ -655,21 +652,7 @@ public class BiocoisoRetriever implements Observer {
 		@SuppressWarnings("unchecked")
 		ArrayList<ArrayList<String>> childrenList = (ArrayList<ArrayList<String>>) keyMap.get("children");
 
-		String children = "";
-
-		int i = 0;
-
-		while (i<childrenList.size()) {
-			if (i==childrenList.size()-1) {
-				children = children + childrenList.get(i).get(0);
-			}
-			else {
-				children = children + childrenList.get(i).get(0) + ", ";
-			}
-			i++;
-		}
-
-		res[2]=children;
+		res[2]= Integer.toString(childrenList.size());
 
 		res[3]=keyMap.get("side");
 
