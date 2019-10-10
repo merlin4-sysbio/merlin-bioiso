@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.Icon;
@@ -21,6 +22,7 @@ import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.interfaces.IEntityAIB;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoiso;
+import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 @Datatype(structure= Structure.SIMPLE, namingMethod="getName",removable=true,removeMethod ="remove")
 public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntityAIB{
@@ -85,16 +87,68 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		return super.getMainTableData();
 	}
 
+	
+	public WorkspaceDataTable[] getLastReactionInfo(Map<?,?> next2,String metabolite, 
+			String choosenReaction, boolean refresh) {
+		
+		String[] columnsNames = new String[] {"metabolite", "role"};
+		
+		
+		ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) next2.get("children"); //list with reactions
 
-	public WorkspaceDataTable[] getReactionInfo(String choosenReaction, boolean refresh) throws FileNotFoundException, IOException, ParseException{
+		WorkspaceDataTable[] results = new WorkspaceDataTable[1];
+		
+		results[0] = new WorkspaceDataTable(columnsNames, "reactions");
+		
+		boolean found =false;
+		int i = 0;
 
+		while (!found &&  i< reactions.size()) {
+
+			ArrayList<Object> reaction = reactions.get(i);
+
+			String reactionID =  (String) reaction.get(0); //r10856
+
+			if (choosenReaction.equals(reactionID)) {
+				found = true;
+				ArrayList<String> reactantsList = (ArrayList<String>) reaction.get(2);
+
+				ArrayList<String> productsList = (ArrayList<String>) reaction.get(3);
+
+				for ( String reactant : reactantsList) {
+					Object[] line = createLineFromProductOrReactant(true,next2,metabolite, reactionID, reactant,"Reactant");
+					results[0].addLine(line);
+				}
+
+				for ( String product : productsList) {
+					Object[] line = createLineFromProductOrReactant(true, next2,metabolite, reactionID, product,"Product");
+					results[0].addLine(line);
+				}
+			}
+
+			i++;
+
+		}
+		return results;
+		
+		
+	}
+	public Pair<WorkspaceDataTable[],Map<?,?>> getReactionInfo(boolean last, String metabolite, 
+			String choosenReaction, boolean refresh) throws FileNotFoundException, IOException, ParseException{
+
+		String[] columnsNames;
 		refresh = true;
+
+		Map<?,?> next2 = (Map<?, ?>) ((Map<?,?>) nextLevel.get(metabolite)).get("next");
+		
 
 		ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) ((Map<?,?>) nextLevel.get(metabolite)).get("children"); //list with reactions
 
 		WorkspaceDataTable[] results = new WorkspaceDataTable[1];
 
-		String[] columnsNames = new String[] {"metabolite", "role", "analysis"};
+			
+		columnsNames = new String[] {"info","metabolite","reactions", "role", "analysis"};
+
 
 		results[0] = new WorkspaceDataTable(columnsNames, "reactions") {
 			private static final long serialVersionUID = 1L;
@@ -124,12 +178,12 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 					ArrayList<String> productsList = (ArrayList<String>) reaction.get(3);
 
 					for ( String reactant : reactantsList) {
-						Object[] line = createLineFromProductOrReactant(this.metabolite, reactionID, reactant,"Reactant");
+						Object[] line = createLineFromProductOrReactant(last, next2,metabolite, reactionID, reactant,"Reactant");
 						results[0].addLine(line);
 					}
 
 					for ( String product : productsList) {
-						Object[] line = createLineFromProductOrReactant(this.metabolite, reactionID, product,"Product");
+						Object[] line = createLineFromProductOrReactant(last, next2,metabolite, reactionID, product,"Product");
 						results[0].addLine(line);
 					}
 				}
@@ -138,51 +192,113 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 			}
 
-			return results;
+			Pair<WorkspaceDataTable[],Map<?,?>> res = new Pair<WorkspaceDataTable[],Map<?,?>>(results, next2);
+
+			return res;
 	}
 
-	private Object[] createLineFromProductOrReactant(String metabolite, String reaction, String reactantOrProduct, String role) {
+	private Object[] createLineFromProductOrReactant(boolean last, Map<?, ?> next, String metabolite, String reaction, String reactantOrProduct, String role) {
 
-		Map<?,?> precursors = (Map<?,?>) ((Map<?, ?>) nextLevel.get(metabolite)).get("next");
+		if (!last) {
+			if (next.get(reactantOrProduct)!=null) {
 
-		if (precursors.get(reactantOrProduct)!=null) {
-			boolean analysis =  (boolean) ((Map<?, ?>) precursors.get(reactantOrProduct)).get("flux");
+				ArrayList<ArrayList<String>> reactions = (ArrayList<ArrayList<String>>) ((Map<?, ?>) next.get(reactantOrProduct)).get("children");
+				boolean analysis =  (boolean) ((Map<?, ?>) next.get(reactantOrProduct)).get("flux");
 
-			Object[] res = new Object[4];
+				Object[] res = new Object[5];
 
-			res[0]=reactantOrProduct;
+				res[1]=reactantOrProduct;
 
-			res[1]= role;
+				res[2]= Integer.toString(reactions.size());
 
-			if (analysis) {
-				res[2] = produced;
+				res[3]= role;
+
+				if (analysis) {
+					res[4] = produced;
+				}
+				else {
+					res[4] = notProduced;
+				}
+				return res;
+
 			}
+
 			else {
-				res[2] = notProduced;
-			}
-			return res;
+				Object[] res = new Object[5];
 
-		}
+				res[1]=reactantOrProduct;
+
+				res[2]=Integer.toString(0);
+
+				res[3]= role;
+
+				res[4] = dontknow;
+
+				return res;
+			}}
 
 		else {
-			Object[] res = new Object[3];
+			Object[] res = new Object[2];
 
 			res[0]=reactantOrProduct;
 
-			res[1]= role;
-			
-			res[2] = dontknow;
-			
+			res[1]=role;
+
 			return res;
 		}
 	}
 
-	public Map<String, ArrayList<ArrayList<String>>> getReactionsAndCompounds(){
-		return (Map<String, ArrayList<ArrayList<String>>>) this.reactionsAndCompounds;
-	}
 
-	public void setReactionsAndCompounds(Map<String, ArrayList<ArrayList<String>>> newMap) {
-		this.reactionsAndCompounds = newMap;
+	public Pair<WorkspaceDataTable[],Map<?,?>> getMetaboliteInfo(String metabolite, boolean refresh, Map<?,?> next) throws FileNotFoundException, IOException, ParseException {
+
+		refresh = true;
+
+		WorkspaceGenericDataTable myTable = this.getMainTableData();
+
+		//		int row = identifier;
+
+		this.metabolite = metabolite;
+		
+		Map<?,?> nextToReturn = (Map<?, ?>) ((Map<?,?>) next.get(metabolite));
+		
+		ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) ((Map<?,?>) next.get(metabolite)).get("children"); //list with reactions
+
+		WorkspaceDataTable[] results = new WorkspaceDataTable[1];
+
+		String[] columnsNames = new String[] {"info","reaction", "reactants", "products", "analysis"};
+
+		results[0] = new WorkspaceDataTable(columnsNames, "reactions") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean isCellEditable(int row, int col){
+				if (col==0)
+				{
+					return true;
+				}
+				else return false;
+			}};
+
+			for (ArrayList<Object> reaction : reactions) {
+
+				String reactionID =  (String) reaction.get(0); //r10856
+
+				boolean analysis = (boolean) reaction.get(1);
+
+				ArrayList<String> reactantsList = (ArrayList<String>) reaction.get(2);
+
+				ArrayList<String> productsList = (ArrayList<String>) reaction.get(3);
+
+				Object[] line = createLineFromMap(analysis, reactionID, reactantsList, productsList);
+
+				results[0].addLine(line);
+
+
+
+			}
+
+			Pair<WorkspaceDataTable[],Map<?,?>> res = new Pair<WorkspaceDataTable[],Map<?,?>>(results,nextToReturn);
+			return res;
 	}
 
 
@@ -194,68 +310,8 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 	 */
 	public WorkspaceDataTable[] getRowInfo(int identifier, boolean refresh) throws FileNotFoundException, IOException, ParseException {
 
-		refresh = true;
-
-		WorkspaceGenericDataTable myTable = this.getMainTableData();
-
-		int row = identifier;
-
-		this.metabolite = (String) myTable.getValueAt(row, 1);
-
-		if(super.getRowInfo()==null || refresh) {
-
-			ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) ((Map<?,?>) nextLevel.get(metabolite)).get("children"); //list with reactions
-
-			WorkspaceDataTable[] results = new WorkspaceDataTable[1];
-
-			String[] columnsNames = new String[] {"info","reaction", "reactants", "products", "analysis"};
-
-			results[0] = new WorkspaceDataTable(columnsNames, "reactions") {
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public boolean isCellEditable(int row, int col){
-					if (col==0)
-					{
-						return true;
-					}
-					else return false;
-				}};
-
-				for (ArrayList<Object> reaction : reactions) {
-
-					String reactionID =  (String) reaction.get(0); //r10856
-
-					boolean analysis = (boolean) reaction.get(1);
-
-					ArrayList<String> reactantsList = (ArrayList<String>) reaction.get(2);
-
-					ArrayList<String> productsList = (ArrayList<String>) reaction.get(3);
-
-					Object[] line = createLineFromMap(analysis, reactionID, reactantsList, productsList);
-
-					results[0].addLine(line);
-
-					ArrayList<ArrayList<String>> res = new ArrayList<ArrayList<String>>();
-
-					res.add(reactantsList);
-
-					res.add(productsList);
-
-					this.reactionsAndCompounds.put(reactionID, res);
-
-
-
-				}
-
-				super.setRowInfo(results);
-		}
 		return super.getRowInfo();
 	}
-
-
-
-
 
 	private Object[] createLineFromMap(boolean analysis, String reactionID, ArrayList<String> reactantsList, ArrayList<String> productsList) {
 		Object[] res = new Object[5];
