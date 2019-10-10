@@ -121,7 +121,7 @@ public class BiocoisoRetriever implements Observer {
 				logger.error("");
 				Workbench.getInstance().error("error while doing the operation! please try again");
 
-//								executeOperation();
+				//				executeOperation();
 			}
 		}
 		catch(Exception e) {
@@ -150,13 +150,13 @@ public class BiocoisoRetriever implements Observer {
 
 		WorkspaceTableAIB table = new WorkspaceTableAIB(name, columnsName , this.project.getName());
 
-//				Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
-//						this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
-//								Arrays.asList(columnsName), this.project.getName(), name);
-
 		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
-				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso_2.json", 
+				this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
 						Arrays.asList(columnsName), this.project.getName(), name);
+
+		//		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
+		//				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso_2.json", 
+		//						Arrays.asList(columnsName), this.project.getName(), name);
 
 		ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name, filledTableAndNextLevel.getB());
 

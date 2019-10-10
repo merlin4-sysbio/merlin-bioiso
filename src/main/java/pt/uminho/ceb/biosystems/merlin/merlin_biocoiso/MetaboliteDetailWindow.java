@@ -31,11 +31,10 @@ import pt.uminho.ceb.biosystems.merlin.aibench.utilities.ButtonColumn;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.MyJTable;
 import pt.uminho.ceb.biosystems.merlin.aibench.views.windows.GenericDetailWindow;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
-import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
-public class BiocoisoDetailWindow extends javax.swing.JDialog{
+public class MetaboliteDetailWindow extends javax.swing.JDialog{
 
 	/**
 	 * 
@@ -51,35 +50,29 @@ public class BiocoisoDetailWindow extends javax.swing.JDialog{
 	private String reaction;
 	private ButtonColumn buttonColumn;
 	private int infoSelectedRow;
-	private Map<String, ArrayList<ArrayList<String>>> mapReactionsAndCompounds;
 	private ValidationBiocoisoAIB entity;
-	private String metabolite;
-	private boolean last;
 	private Map<?, ?> next;
 
-	//	public BiocoisoDetailWindow(Map<String, ArrayList<ArrayList<String>>> mapReactionsAndCompounds, WorkspaceDataTable[] table, String windowName, String name) {
-	//
-	//		super(Workbench.getInstance().getMainFrame());
-	//		this.dataTable = table;
-	//		this.mapReactionsAndCompounds=mapReactionsAndCompounds;
-	//		initGUI(table, windowName, name);
-	//		Utilities.centerOnOwner(this);
-	//		this.setIconImage((new ImageIcon(getClass().getClassLoader().getResource("icons/merlin.png"))).getImage());
-	//		this.setVisible(true);		
-	//		this.setAlwaysOnTop(true);
-	//		this.toFront();
-	//		
-	//	}
-
-	public BiocoisoDetailWindow(Map<?, ?> next, boolean last, String metabolite, ValidationBiocoisoAIB entity,
-			WorkspaceDataTable[] table, String windowName, String name) {
+//	public BiocoisoDetailWindow(Map<String, ArrayList<ArrayList<String>>> mapReactionsAndCompounds, WorkspaceDataTable[] table, String windowName, String name) {
+//
+//		super(Workbench.getInstance().getMainFrame());
+//		this.dataTable = table;
+//		this.mapReactionsAndCompounds=mapReactionsAndCompounds;
+//		initGUI(table, windowName, name);
+//		Utilities.centerOnOwner(this);
+//		this.setIconImage((new ImageIcon(getClass().getClassLoader().getResource("icons/merlin.png"))).getImage());
+//		this.setVisible(true);		
+//		this.setAlwaysOnTop(true);
+//		this.toFront();
+//		
+//	}
+	
+	public MetaboliteDetailWindow(ValidationBiocoisoAIB entity, WorkspaceDataTable[] table, String windowName, String name, Map<?,?> next) {
 
 		super(Workbench.getInstance().getMainFrame());
-		this.last=last;
-		this.metabolite=metabolite;
 		this.dataTable = table;
 		this.next=next;
-		//		this.mapReactionsAndCompounds=mapReactionsAndCompounds;
+//		this.mapReactionsAndCompounds=mapReactionsAndCompounds;
 		this.entity=entity;
 		initGUI(table, windowName, name);
 		Utilities.centerOnOwner(this);
@@ -87,7 +80,7 @@ public class BiocoisoDetailWindow extends javax.swing.JDialog{
 		this.setVisible(true);		
 		this.setAlwaysOnTop(true);
 		this.toFront();
-
+		
 	}
 	private void initGUI(WorkspaceDataTable[] querydatas, String windowName, String name) {
 
@@ -152,7 +145,6 @@ public class BiocoisoDetailWindow extends javax.swing.JDialog{
 			jTable1.setShowGrid(false);
 			jScrollPane1.setViewportView(jTable1);
 			jTable1.setModel(querydatas[0]);
-
 			buttonColumn =  new ButtonColumn(jTable1,0, new ActionListener(){
 				public void actionPerformed(ActionEvent arg0){
 					processButton(arg0);
@@ -276,33 +268,24 @@ public class BiocoisoDetailWindow extends javax.swing.JDialog{
 
 			boolean refresh = (this.infoSelectedRow == jTable1.getSelectedRow());
 
-			String reactionID = (String) jTable1.getValueAt(jTable1.getSelectedRow(),1);
-
 			refresh = true;
-
-			Pair<WorkspaceDataTable[],Map<?,?>> reactionInfo;
-			WorkspaceDataTable[] results;
-
-
-			if (!this.last) {
-				
-				reactionInfo = this.entity.getReactionInfo(last,metabolite,reactionID, refresh);
-
-				results = reactionInfo.getA();
-				
-				Map<?,?> next2 = reactionInfo.getB();
-				
-				new MetaboliteDetailWindow(this.entity,results, (String) jTable1.getValueAt(jTable1.getSelectedRow(),1), 
-						"reaction: " + jTable1.getValueAt(jTable1.getSelectedRow(),1), next2);
-				
+			
+			String metabolite = (String) jTable1.getValueAt(jTable1.getSelectedRow(),1);
+			
+			int reactions = Integer.parseInt((String) jTable1.getValueAt(jTable1.getSelectedRow(),2));
+			
+			if (reactions>0) {
+			
+			Pair<WorkspaceDataTable[], Map<?, ?>> metaboliteInfo = this.entity.getMetaboliteInfo(metabolite, refresh, next);
+			
+			WorkspaceDataTable[] results = metaboliteInfo.getA();
+			
+			new BiocoisoDetailWindow(metaboliteInfo.getB(), true, metabolite, this.entity, results, (String) jTable1.getValueAt(jTable1.getSelectedRow(),1), 
+					"metabolite: " + jTable1.getValueAt(jTable1.getSelectedRow(),1));
 			}
-
-			else {
-				results = this.entity.getLastReactionInfo(next,metabolite,reactionID, refresh);
-				
-				new GenericDetailWindow(results, (String) jTable1.getValueAt(jTable1.getSelectedRow(),1), 
-						"reaction: " + jTable1.getValueAt(jTable1.getSelectedRow(),1));
-			}
+			
+			else
+				Workbench.getInstance().warn("Please choose another metabolite");
 		} 
 		catch (Exception e) {
 			Workbench.getInstance().error(e);

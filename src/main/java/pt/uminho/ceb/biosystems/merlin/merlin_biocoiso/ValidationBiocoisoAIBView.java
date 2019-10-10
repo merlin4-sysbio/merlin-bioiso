@@ -14,6 +14,7 @@ import java.util.Calendar;
 import java.util.EventObject;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -35,6 +36,7 @@ import pt.uminho.ceb.biosystems.merlin.aibench.views.WorkspaceUpdatablePanel;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
+import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 
 public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
@@ -231,14 +233,19 @@ public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
 			model.setSelectionInterval( buttonColumn.getSelectIndex(button), buttonColumn.getSelectIndex(button));
 
 			int row = jTable.getSelectedRow();
+			
+			String metabolite = (String) jTable.getValueAt(jTable.getSelectedRow(),1);
 
 			boolean refresh = (this.infoSelectedRow == jTable.getSelectedRow());
+			
+			Pair<WorkspaceDataTable[],Map<?,?>> metaboliteInfo = this.entity.getMetaboliteInfo(metabolite, refresh,this.entity.getNextLevel());
 
-			WorkspaceDataTable[] table = entity.getRowInfo(row, refresh);
+			WorkspaceDataTable[] table = metaboliteInfo.getA();
 			
 			this.infoSelectedRow = jTable.getSelectedRow();
 			
-			new BiocoisoDetailWindow(this.entity, table, (String) jTable.getValueAt(jTable.getSelectedRow(),1), 
+			new BiocoisoDetailWindow(this.entity.getNextLevel(),false,metabolite,
+					this.entity, table, (String) jTable.getValueAt(jTable.getSelectedRow(),1), 
 					"metabolite: " + jTable.getValueAt(jTable.getSelectedRow(),1));
 			
 		} 
