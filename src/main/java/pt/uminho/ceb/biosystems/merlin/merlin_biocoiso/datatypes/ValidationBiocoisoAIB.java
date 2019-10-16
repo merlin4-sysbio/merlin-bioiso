@@ -324,16 +324,12 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		return res;
 	}
 
-
 	public Map<?, ?> getNextLevel() {
 		return nextLevel;
 	}
 
-
 	public void setNextLevel(Map<?, ?> nextLevel) {
 		this.nextLevel = nextLevel;
 	}
-
-
 
 }
