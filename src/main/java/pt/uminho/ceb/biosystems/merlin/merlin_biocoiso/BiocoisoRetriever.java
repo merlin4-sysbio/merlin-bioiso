@@ -58,7 +58,7 @@ import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 
-/**Aibench operation for BioCoISO
+/**Aibench operation for BioISO
  * @author João Capela
  *
  */
@@ -226,7 +226,7 @@ public class BiocoisoRetriever implements Observer {
 
 	/////////////////////////////////////////////////////
 
-	/**This method allows the submission of the required files for BioCoISO into the web server, the download of the results and the verification 
+	/**This method allows the submission of the required files for BioISO into the web server, the download of the results and the verification 
 	 * of the md5 key as well as show error and warning messages
 	 * @return boolean informing whether the submission went well or not.
 	 * @throws Exception 
@@ -466,7 +466,7 @@ public class BiocoisoRetriever implements Observer {
 	}
 
 	/**
-	 * This method generates the required files for BioCoISO to run. A file with the biomass reaction id, another with the protein's name and the model.
+	 * This method generates the required files for BioISO to run. A file with the biomass reaction id, another with the protein's name and the model.
 	 * @return List<File> with the required files.
 	 * @throws Exception
 	 */
@@ -556,7 +556,7 @@ public class BiocoisoRetriever implements Observer {
 	}
 
 	/**
-	 * This method creates the data table with the results. This table will be rendered in BioCoISO's view.
+	 * This method creates the data table with the results. This table will be rendered in BioISO's view.
 	 * @param file
 	 * @param columnsNames
 	 * @param name

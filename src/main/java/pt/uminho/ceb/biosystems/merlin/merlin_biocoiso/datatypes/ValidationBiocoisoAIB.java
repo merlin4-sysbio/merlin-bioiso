@@ -32,8 +32,6 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 	private Icon produced;
 	private Icon dontknow;
 	private Map<?, ?> nextLevel;
-	private Map<String, ArrayList<ArrayList<String>>> reactionsAndCompounds;
-	private String metabolite;
 
 
 	/**
@@ -57,7 +55,6 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 		produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Ok.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 		dontknow = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/question.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
-		this.reactionsAndCompounds= new HashMap<String, ArrayList<ArrayList<String>>>();
 	}
 
 
@@ -253,12 +250,8 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 		refresh = true;
 
-		WorkspaceGenericDataTable myTable = this.getMainTableData();
-
 		//		int row = identifier;
 
-		this.metabolite = metabolite;
-		
 		Map<?,?> nextToReturn = (Map<?, ?>) ((Map<?,?>) next.get(metabolite));
 		
 		ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) ((Map<?,?>) next.get(metabolite)).get("children"); //list with reactions
@@ -331,16 +324,12 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		return res;
 	}
 
-
 	public Map<?, ?> getNextLevel() {
 		return nextLevel;
 	}
 
-
 	public void setNextLevel(Map<?, ?> nextLevel) {
 		this.nextLevel = nextLevel;
 	}
-
-
 
 }
