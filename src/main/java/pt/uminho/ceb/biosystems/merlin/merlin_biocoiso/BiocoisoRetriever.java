@@ -312,33 +312,16 @@ public class BiocoisoRetriever implements Observer {
 						//The following code will show different error and warning messages to merlin users depending on the error founded
 
 						while (!stop && i<listOfFiles.length) {
-							if (listOfFiles[i].getName().equals("1") ) {
-								Workbench.getInstance().warn("Fail loading the model");
-								stop = true;
-								verify=false;
-							}
-							else if (listOfFiles[i].getName().equals("2") ){
-								Workbench.getInstance().warn("CPLEX was not found");
-								stop = true;
-								verify=false;
-							}
-							else if (listOfFiles[i].getName().equals("3") ){
-								Workbench.getInstance().warn("There is no Biomass reaction or its ID is incorrect");
-								stop = true;
-								verify=false;
-							}
-							else if (listOfFiles[i].getName().equals("4") ){
-								Workbench.getInstance().warn("The protein name is incorrect");
-								stop = true;
-								verify=false;
-							}
-							else if (listOfFiles[i].getName().equals("5") ){
-								Workbench.getInstance().warn("The output file name is incorrect");
-								stop = true;
-								verify=false;
-							}
-							else if (listOfFiles[i].getName().equals("6") ) {
-								Workbench.getInstance().warn("One or more files are not correctly named");
+							if (listOfFiles[i].getName().equals("error_message") ) {
+								BufferedReader reader = new BufferedReader(new FileReader(folder+"/error_message"));
+
+								String line;
+
+								line = reader.readLine();
+								
+								reader.close();
+								
+								Workbench.getInstance().warn(line);
 								stop = true;
 								verify=false;
 							}
