@@ -51,6 +51,7 @@ import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.SequenceType;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
+import pt.uminho.ceb.biosystems.merlin.processes.WorkspaceProcesses;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelSequenceServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
@@ -210,10 +211,9 @@ public class BiocoisoRetriever implements Observer {
 				if(!ModelSequenceServices.checkGenomeSequences(workspaceName, SequenceType.PROTEIN)) {
 					throw new IllegalArgumentException("please set the project fasta ('.faa' or '.fna') files");
 				}
-				else if(this.project.getTaxonomyID()<0) {
 
-					throw new IllegalArgumentException("please enter the taxonomic identification from NCBI taxonomy");
-				}
+				WorkspaceProcesses.createFaaFile(this.project.getName(), this.project.getTaxonomyID()); // method creates ".faa" files only if they do not exist
+			
 
 			} catch (Exception e) {
 				Workbench.getInstance().error(e);
