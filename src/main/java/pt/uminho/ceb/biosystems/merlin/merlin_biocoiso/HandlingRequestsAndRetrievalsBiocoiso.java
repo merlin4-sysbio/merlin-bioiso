@@ -25,7 +25,7 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 
 //	private static final String URL = "https://biocoiso.bio.di.uminho.pt";
 	
-	private static final String URL = "https://bioiso.bio.di.uminho.pt";
+//	private static final String URL = "https://bioiso.bio.di.uminho.pt";
 
 	final static Logger logger = LoggerFactory.getLogger(HandlingRequestsAndRetrievalsBiocoiso.class);
 	
@@ -34,14 +34,18 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 	private String reaction;
 
 	private String objective;
+	
+	private String url;
 
-	public HandlingRequestsAndRetrievalsBiocoiso(File model, String reaction, String objective){
+	public HandlingRequestsAndRetrievalsBiocoiso(File model, String reaction, String objective, String url){
 
 		this.setModel(model);
 		
 		this.reaction=reaction;
 		
 		this.objective=objective;
+		
+		this.url = url;
 		
 
 	}
@@ -55,7 +59,7 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 	 */
 	public String postFiles() throws IOException, InterruptedException {
 
-		String uploadUrl = URL.concat("/submitMerlinPlugin/"+reaction+"/"+objective);
+		String uploadUrl = this.url.concat("/submitMerlinPlugin/"+reaction+"/"+objective);
 
 		String charset = "UTF-8";
 		String param = "value";
@@ -150,7 +154,7 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 	 */
 	public int getStatus(String submissionID) throws IOException {
 
-		String uploadUrl = URL.concat("/status");
+		String uploadUrl = this.url.concat("/status");
 
 		uploadUrl = uploadUrl.concat("/"+submissionID+"/True");
 
@@ -182,7 +186,7 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 	public boolean downloadFile(String submissionID, String path) throws IOException {
 
 		try {
-			String uploadUrl = URL.concat("/download");
+			String uploadUrl = this.url.concat("/download");
 
 			uploadUrl = uploadUrl.concat("/"+submissionID);
 

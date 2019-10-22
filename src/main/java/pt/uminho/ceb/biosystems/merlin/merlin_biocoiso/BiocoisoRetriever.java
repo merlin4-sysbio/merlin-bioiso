@@ -81,6 +81,7 @@ public class BiocoisoRetriever implements Observer {
 	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Ok.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	private String objective;
+	private String url;
 
 
 
@@ -132,6 +133,10 @@ public class BiocoisoRetriever implements Observer {
 		}
 	}
 
+	@Port(direction=Direction.INPUT, name="url",description="default BioISO url", advanced=true, defaultValue = "https://bioiso.bio.di.uminho.pt", order = 4)
+	public void setURL(String url) throws Exception {
+		this.url = url;
+	}
 
 	@Port(direction=Direction.INPUT, name="Workspace",description="select the new model workspace",validateMethod="checkNewProject", order = 1)
 	public void setNewProject(String projectName) throws Exception {
@@ -239,7 +244,7 @@ public class BiocoisoRetriever implements Observer {
 			return false;
 		}
 
-		HandlingRequestsAndRetrievalsBiocoiso post = new HandlingRequestsAndRetrievalsBiocoiso(model, this.reaction, this.objective);
+		HandlingRequestsAndRetrievalsBiocoiso post = new HandlingRequestsAndRetrievalsBiocoiso(model, this.reaction, this.objective, this.url);
 
 		String submissionID = "";
 
