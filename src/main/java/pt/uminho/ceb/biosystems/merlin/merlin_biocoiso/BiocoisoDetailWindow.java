@@ -31,7 +31,6 @@ import pt.uminho.ceb.biosystems.merlin.aibench.utilities.ButtonColumn;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.MyJTable;
 import pt.uminho.ceb.biosystems.merlin.aibench.views.windows.GenericDetailWindow;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
-import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
@@ -51,7 +50,6 @@ public class BiocoisoDetailWindow extends javax.swing.JDialog{
 	private String reaction;
 	private ButtonColumn buttonColumn;
 	private int infoSelectedRow;
-	private Map<String, ArrayList<ArrayList<String>>> mapReactionsAndCompounds;
 	private ValidationBiocoisoAIB entity;
 	private String metabolite;
 	private boolean last;
@@ -272,7 +270,6 @@ public class BiocoisoDetailWindow extends javax.swing.JDialog{
 			ListSelectionModel model = jTable1.getSelectionModel();
 			model.setSelectionInterval( buttonColumn.getSelectIndex(button), buttonColumn.getSelectIndex(button));
 
-			int row = jTable1.getSelectedRow();
 
 			boolean refresh = (this.infoSelectedRow == jTable1.getSelectedRow());
 

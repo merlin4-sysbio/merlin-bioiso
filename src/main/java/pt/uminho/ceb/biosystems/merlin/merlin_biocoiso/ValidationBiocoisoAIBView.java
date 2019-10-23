@@ -232,8 +232,6 @@ public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
 			ListSelectionModel model = jTable.getSelectionModel();
 			model.setSelectionInterval( buttonColumn.getSelectIndex(button), buttonColumn.getSelectIndex(button));
 
-			int row = jTable.getSelectedRow();
-			
 			String metabolite = (String) jTable.getValueAt(jTable.getSelectedRow(),1);
 
 			boolean refresh = (this.infoSelectedRow == jTable.getSelectedRow());
