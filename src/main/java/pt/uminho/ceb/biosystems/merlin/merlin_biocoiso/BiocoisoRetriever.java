@@ -77,8 +77,8 @@ public class BiocoisoRetriever implements Observer {
 	private String reaction;
 	final static Logger logger = LoggerFactory.getLogger(BiocoisoRetriever.class);
 	private Map<?,?> resultMap;
-	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
-	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Ok.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/notProducing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/producing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	private String objective;
 
 
