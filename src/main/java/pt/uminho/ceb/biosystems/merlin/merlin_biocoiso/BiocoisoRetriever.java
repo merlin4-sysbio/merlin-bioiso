@@ -51,6 +51,7 @@ import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.SequenceType;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
+import pt.uminho.ceb.biosystems.merlin.processes.WorkspaceProcesses;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelSequenceServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
@@ -80,6 +81,7 @@ public class BiocoisoRetriever implements Observer {
 	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/notProducing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/producing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	private String objective;
+	private String url;
 
 
 
@@ -131,6 +133,10 @@ public class BiocoisoRetriever implements Observer {
 		}
 	}
 
+	@Port(direction=Direction.INPUT, name="url",description="default BioISO url", advanced=true, defaultValue = "https://bioiso.bio.di.uminho.pt", order = 4)
+	public void setURL(String url) throws Exception {
+		this.url = url;
+	}
 
 	@Port(direction=Direction.INPUT, name="Workspace",description="select the new model workspace",validateMethod="checkNewProject", order = 1)
 	public void setNewProject(String projectName) throws Exception {
@@ -210,10 +216,9 @@ public class BiocoisoRetriever implements Observer {
 				if(!ModelSequenceServices.checkGenomeSequences(workspaceName, SequenceType.PROTEIN)) {
 					throw new IllegalArgumentException("please set the project fasta ('.faa' or '.fna') files");
 				}
-				else if(this.project.getTaxonomyID()<0) {
 
-					throw new IllegalArgumentException("please enter the taxonomic identification from NCBI taxonomy");
-				}
+				WorkspaceProcesses.createFaaFile(this.project.getName(), this.project.getTaxonomyID()); // method creates ".faa" files only if they do not exist
+			
 
 			} catch (Exception e) {
 				Workbench.getInstance().error(e);
@@ -239,7 +244,7 @@ public class BiocoisoRetriever implements Observer {
 			return false;
 		}
 
-		HandlingRequestsAndRetrievalsBiocoiso post = new HandlingRequestsAndRetrievalsBiocoiso(model, this.reaction, this.objective);
+		HandlingRequestsAndRetrievalsBiocoiso post = new HandlingRequestsAndRetrievalsBiocoiso(model, this.reaction, this.objective, this.url);
 
 		String submissionID = "";
 

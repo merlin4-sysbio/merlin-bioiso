@@ -3,6 +3,7 @@ package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -61,6 +62,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	private ExtendedJComboBox<String> reaction ;
 	private ExtendedJComboBox<String> models ;
 	private ExtendedJComboBox<String> objective;
+	private JTextField url;
 	private ParamsReceiver rec;
 
 	protected Object project;
@@ -95,7 +97,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		}
 		this.models = new ExtendedJComboBox<String>(workspaces);
 		this.objective = new ExtendedJComboBox<String>(new String[0]);
-		
+		this.url = new JTextField("https://bioiso.bio.di.uminho.pt");
 		
 		this.reaction = new ExtendedJComboBox<String>(new String[0]);;
 		if(this.models.getModel().getSize()>0)
@@ -138,7 +140,9 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 						new ParamSpec[]{
 								new ParamSpec("Workspace", String.class,models.getSelectedItem().toString(),null),
 								new ParamSpec("Reaction", String.class,reaction.getSelectedItem().toString(),null),
-								new ParamSpec("Objective", String.class,objective.getSelectedItem().toString(),null)
+								new ParamSpec("Objective", String.class,objective.getSelectedItem().toString(),null),
+								new ParamSpec("url", String.class,url.getSelectedText().toString(),null)
+
 						}
 						);
 				
@@ -151,16 +155,16 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		cancelButton.setIcon(new CreateImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")),0.1).resizeImageIcon());
 		cancelButton.addActionListener(event -> {
 
-			String[] options = new String[2];
-			options[0] = "yes";
-			options[1] = "no";
+			//String[] options = new String[2];
+			//options[0] = "yes";
+			//options[1] = "no";
 
-			int result = CustomGUI.stopQuestion("cancel confirmation", "are you sure you want to cancel the operation?", options);
+			//int result = CustomGUI.stopQuestion("cancel confirmation", "are you sure you want to cancel the operation?", options);
 
-			if(result == 0) {
+			//if(result == 0) {
 				canceled = true;
 				dispose();
-			}
+			//}
 
 		});
 
@@ -179,7 +183,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	}
 	
 	private InputParameter[] getInputParameters() {
-		InputParameter[] parameters = new InputParameter[3];
+		InputParameter[] parameters = new InputParameter[4];
 		parameters[0] = 
 
 				new InputParameter(
@@ -199,6 +203,12 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 						"Objective", 
 						objective, 
 						"Objective"
+						);
+		parameters[3] = 
+				new InputParameter(
+						"URL", 
+						url, 
+						"BioISO URL"
 						);
 		
 		return parameters;
