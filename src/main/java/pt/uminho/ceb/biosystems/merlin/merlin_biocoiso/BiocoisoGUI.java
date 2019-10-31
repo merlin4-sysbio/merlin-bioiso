@@ -237,12 +237,10 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 			Container container = new Container(new ContainerBuilder(workspace.getName(), "model_".concat(workspace.getName()),
 					ProjectServices.isCompartmentalisedModel(workspace.getName()), false, "", "e-biomass"));
 			
-			SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(biocoisoFile.toString().concat("/model.xml"), 
-					container, "", false, null, true, SBMLLevelVersion.L3V1, true);
 			
 //			merlinSBML3Writer.writeToFile();
 			
-			Map<String, ReactionCI> dictionary = merlinSBML3Writer.getContainer().getReactions();
+			Map<String, ReactionCI> dictionary = container.getReactions();
 			
 			String[] reactions = dictionary.keySet().toArray(new String[dictionary.size()]);
 			

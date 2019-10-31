@@ -12,7 +12,7 @@
 			name="aibench.core.operation-definition"
 			class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.BiocoisoRetriever">
 			<operation-description name="BioISO"
-				path="50@validation/" uid="operations.BioCoISO.ID" />
+				path="40@validation/" uid="operations.BioCoISO.ID" />
 		</extension>
 
 		<extension uid="aibench.workbench"

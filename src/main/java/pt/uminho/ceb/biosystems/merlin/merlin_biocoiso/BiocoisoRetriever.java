@@ -93,8 +93,15 @@ public class BiocoisoRetriever implements Observer {
 
 	@Port(direction=Direction.INPUT, name="Objective",description="", order = 3)
 	public void setObjective (String objective){
+		this.objective=objective;
+	}
+
+	@Port(direction=Direction.INPUT, name="url",description="default BioISO url", advanced=true, defaultValue = "https://bioiso.bio.di.uminho.pt", order = 4)
+	public void setURL(String url) throws Exception {
+		this.url = url;
+		
 		try {
-			this.objective=objective;
+			
 
 			creationOfRequiredFiles();
 
@@ -131,11 +138,6 @@ public class BiocoisoRetriever implements Observer {
 			Workbench.getInstance().error(e);
 			e.printStackTrace();
 		}
-	}
-
-	@Port(direction=Direction.INPUT, name="url",description="default BioISO url", advanced=true, defaultValue = "https://bioiso.bio.di.uminho.pt", order = 4)
-	public void setURL(String url) throws Exception {
-		this.url = url;
 	}
 
 	@Port(direction=Direction.INPUT, name="Workspace",description="select the new model workspace",validateMethod="checkNewProject", order = 1)
