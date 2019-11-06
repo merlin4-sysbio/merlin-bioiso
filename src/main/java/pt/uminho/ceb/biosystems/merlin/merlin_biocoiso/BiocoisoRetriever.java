@@ -78,8 +78,8 @@ public class BiocoisoRetriever implements Observer {
 	private String reaction;
 	final static Logger logger = LoggerFactory.getLogger(BiocoisoRetriever.class);
 	private Map<?,?> resultMap;
-	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
-	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Ok.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/notProducing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/producing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	private String objective;
 	private String url;
 
@@ -93,8 +93,15 @@ public class BiocoisoRetriever implements Observer {
 
 	@Port(direction=Direction.INPUT, name="Objective",description="", order = 3)
 	public void setObjective (String objective){
+		this.objective=objective;
+	}
+
+	@Port(direction=Direction.INPUT, name="url",description="default BioISO url", advanced=true, defaultValue = "https://bioiso.bio.di.uminho.pt", order = 4)
+	public void setURL(String url) throws Exception {
+		this.url = url;
+		
 		try {
-			this.objective=objective;
+			
 
 			creationOfRequiredFiles();
 
@@ -123,7 +130,7 @@ public class BiocoisoRetriever implements Observer {
 				logger.error("");
 				Workbench.getInstance().error("error while doing the operation! please try again");
 
-				//				executeOperation();
+//				executeOperation();
 			}
 		}
 		catch(Exception e) {
@@ -131,11 +138,6 @@ public class BiocoisoRetriever implements Observer {
 			Workbench.getInstance().error(e);
 			e.printStackTrace();
 		}
-	}
-
-	@Port(direction=Direction.INPUT, name="url",description="default BioISO url", advanced=true, defaultValue = "https://bioiso.bio.di.uminho.pt", order = 4)
-	public void setURL(String url) throws Exception {
-		this.url = url;
 	}
 
 	@Port(direction=Direction.INPUT, name="Workspace",description="select the new model workspace",validateMethod="checkNewProject", order = 1)
@@ -160,9 +162,9 @@ public class BiocoisoRetriever implements Observer {
 				this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
 						Arrays.asList(columnsName), this.project.getName(), name);
 
-		//		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
-		//				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso_2.json", 
-		//						Arrays.asList(columnsName), this.project.getName(), name);
+//		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
+//				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso_2.json", 
+//						Arrays.asList(columnsName), this.project.getName(), name);
 
 		ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name, filledTableAndNextLevel.getB());
 
