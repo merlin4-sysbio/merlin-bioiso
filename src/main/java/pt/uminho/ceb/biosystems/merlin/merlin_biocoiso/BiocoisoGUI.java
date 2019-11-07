@@ -129,7 +129,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		okButton = new JButton("proceed");
 		okButton.setEnabled(true);
 		okButton.setToolTipText("proceed");
-		okButton.setIcon(new CreateImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Ok.png")),0.1).resizeImageIcon());
+		okButton.setIcon(new CreateImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Ok.png")),0.7).resizeImageIcon());
 		ActionListener listener= new ActionListener() {
 
 			@Override
@@ -152,7 +152,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 		cancelButton = new JButton("cancel");
 		cancelButton.setToolTipText("cancel");
-		cancelButton.setIcon(new CreateImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")),0.1).resizeImageIcon());
+		cancelButton.setIcon(new CreateImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")),0.7).resizeImageIcon());
 		cancelButton.addActionListener(event -> {
 
 			//String[] options = new String[2];
