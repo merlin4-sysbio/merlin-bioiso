@@ -141,7 +141,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 								new ParamSpec("Workspace", String.class,models.getSelectedItem().toString(),null),
 								new ParamSpec("Reaction", String.class,reaction.getSelectedItem().toString(),null),
 								new ParamSpec("Objective", String.class,objective.getSelectedItem().toString(),null),
-								new ParamSpec("url", String.class,url.getSelectedText().toString(),null)
+								new ParamSpec("url", String.class,url.getText(),null)
 
 						}
 						);
