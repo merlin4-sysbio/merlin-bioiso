@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.sing_group.gc4s.dialog.AbstractInputJDialog;
 import org.sing_group.gc4s.input.InputParameter;
 import org.sing_group.gc4s.input.InputParametersPanel;
@@ -99,7 +100,11 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		this.objective = new ExtendedJComboBox<String>(new String[0]);
 		this.url = new JTextField("https://bioiso.bio.di.uminho.pt");
 		
-		this.reaction = new ExtendedJComboBox<String>(new String[0]);;
+		this.reaction = new ExtendedJComboBox<String>(new String[0]);
+		this.reaction.setEditable(true);
+		AutoCompleteDecorator.decorate(this.reaction);
+		
+		
 		if(this.models.getModel().getSize()>0)
 			this.setReactions();
 		
