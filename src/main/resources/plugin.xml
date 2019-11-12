@@ -1,7 +1,7 @@
 <plugin start="true">
 	<uid>pt.uminho.ceb.biosystems.merlin.biocoiso</uid>
 	<name>merlin-biocoiso</name>
-	<version>4.0.2</version>
+	<version>4.0.0</version>
 
 	<dependencies>
 		<dependency uid="merlin" />
@@ -34,10 +34,6 @@
 				datatype="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB"
 				class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoisoAIBView" />
 				<!-- class="pt.uminho.ceb.biosystems.merlin.aibench.views.WorkspaceGenericEntityDataView" /> -->
-		</extension>
-		<extension uid="aibench.workbench"
-			name="aibench.workbench.view">
-			<menu-icon menu="validation" icon="icons/Lifecycle/validation.png" />
 		</extension>
 	</extensions>
 </plugin>
