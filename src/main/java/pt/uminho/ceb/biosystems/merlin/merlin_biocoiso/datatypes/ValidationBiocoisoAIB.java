@@ -38,14 +38,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 	 * @param dbt
 	 * @param name
 	 */
-	//	public ValidationBiocoisoAIB(WorkspaceTableAIB dbt, String name) {
-	//
-	//		super(dbt, name);
-	//		workspaceName = dbt.getWorkspaceName();
-	//		notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
-	//		produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Ok.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
-	//	}
-
+	
 
 	public ValidationBiocoisoAIB(WorkspaceTableAIB dbt, String name, Map<?, ?> nextLevel) {
 
