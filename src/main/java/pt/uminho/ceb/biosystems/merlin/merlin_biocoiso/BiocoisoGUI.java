@@ -80,11 +80,11 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	}
 
 	public String getDialogTitle() {
-		return "BioCoISO";
+		return "BioISO";
 	}
 
 	public String getDescription() {
-		return "Get results from BioCoISO";
+		return "Get results from BioISO";
 	}
 
 	public JPanel getInputComponentsPane() {
@@ -276,7 +276,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		}
 		catch (Exception e1) {
 
-			Workbench.getInstance().warn("A problem was found when trying to export the model");;
+			Workbench.getInstance().warn("A problem was found when trying to find the reactions");;
 			e1.printStackTrace();
 		}
 		

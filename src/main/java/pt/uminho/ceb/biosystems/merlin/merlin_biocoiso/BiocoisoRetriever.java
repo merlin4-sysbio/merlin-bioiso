@@ -103,8 +103,6 @@ public class BiocoisoRetriever implements Observer {
 		try {
 			
 
-			creationOfRequiredFiles();
-
 			this.startTime = GregorianCalendar.getInstance().getTimeInMillis();
 
 			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 4, "submitting files...");
@@ -483,13 +481,14 @@ public class BiocoisoRetriever implements Observer {
 
 		File model = new File(biocoisoFolder.toString().concat("/model.xml"));
 
-		if(model.exists()) {
-			FileUtils.delete(model);
-		}
+//		if(model.exists()) {
+//			FileUtils.delete(model);
+//		}
+		
 		if(biocoisoFolder.exists()) {
 
 			try {
-				FileUtils.deleteDirectory(biocoisoFolder);
+				org.apache.commons.io.FileUtils.deleteDirectory(biocoisoFolder);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
