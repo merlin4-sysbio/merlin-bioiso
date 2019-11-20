@@ -105,14 +105,12 @@ public class BiocoisoRetriever implements Observer {
 
 			this.startTime = GregorianCalendar.getInstance().getTimeInMillis();
 
-			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 4, "submitting files...");
-
 
 			boolean submitted = submitFiles();
 
 			if (submitted && !this.cancel.get()) {
 
-				this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 4, "Rendering results...");
+				this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 5, 5, "Rendering results...");
 
 				logger.info("The files for BioISO were submitted successfully");
 
@@ -237,6 +235,7 @@ public class BiocoisoRetriever implements Observer {
 	 * @throws Exception 
 	 */
 	public boolean submitFiles() throws Exception {
+		
 
 		File model = creationOfRequiredFiles();
 
@@ -251,6 +250,8 @@ public class BiocoisoRetriever implements Observer {
 		boolean verify = false;
 
 		try {
+			
+			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 1, 5, "submitting files...");
 
 			submissionID = post.postFiles();
 
@@ -260,7 +261,7 @@ public class BiocoisoRetriever implements Observer {
 					logger.info("SubmissionID attributed: {}", submissionID);
 					int responseCode = -1;
 
-					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 1, 4, 
+					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 2, 5, 
 							"files submitted, waiting for results...");
 
 					while (responseCode!=200 &&  !this.cancel.get()) {
@@ -291,13 +292,13 @@ public class BiocoisoRetriever implements Observer {
 					}
 
 
-					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 2, 4, "downloading BioISO results");
+					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 3, 5, "downloading BioISO results");
 
 					if(!this.cancel.get())
 						verify = post.downloadFile(submissionID, getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME).concat("/results.zip"));
 
 
-					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 3, 4, "verifying...");
+					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 5, "verifying...");
 
 					biocoisoResultsFile = getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME).concat("/results/");
 
@@ -496,6 +497,8 @@ public class BiocoisoRetriever implements Observer {
 
 		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
+		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 5, "exporting the model...");
+		
 		Container container = new Container(new ContainerBuilder(this.project.getName(), "model_".concat(this.project.getName()),
 				ProjectServices.isCompartmentalisedModel(this.project.getName()), false, "", "e-biomass"));
 
