@@ -26,6 +26,8 @@ import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableColumnModel;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import es.uvigo.ei.aibench.workbench.Workbench;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.ButtonColumn;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.CreateImageIcon;
@@ -105,7 +107,7 @@ public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
 			{
 				jButton1ExportTxt = new JButton();
 				jPanel4.add(jButton1ExportTxt, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-				jButton1ExportTxt.setToolTipText("export to text file (xls)");
+				jButton1ExportTxt.setToolTipText("export to text file (json)");
 				jButton1ExportTxt.setText("export file");
 				jButton1ExportTxt.setIcon(new CreateImageIcon(new ImageIcon((getClass().getClassLoader().getResource("icons/Download.png"))),0.1).resizeImageIcon());
 				jButton1ExportTxt.setBounds(532, 72, 174, 38);
@@ -131,10 +133,13 @@ public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
 								int min = cal.get(Calendar.MINUTE);             // 0..59
 								int day = cal.get(Calendar.DAY_OF_YEAR);		//0..365
 
-								filePath += "/"+entity.getName()+"_"+entity.getWorkspace().getName()+"_"+hour24+"_"+min+"_"+day+".xlsx";
+								filePath += "/"+entity.getName()+"_"+entity.getWorkspace().getName()+"_"+hour24+"_"+min+"_"+day+".json";
 
-								ExportToXLS.exportToXLS(filePath, dataTable, jTable);
-
+								
+								ObjectMapper mapper = new ObjectMapper();
+								
+								mapper.writeValue(new File(filePath), getEntireMap());
+								
 								Workbench.getInstance().info("Data successfully exported.");
 							}
 
@@ -169,6 +174,10 @@ public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
 		}
 
 		this.setPreferredSize(new java.awt.Dimension(887, 713));
+	}
+	
+	public Map<?, ?> getEntireMap() {
+		return this.entity.getEntireMap();
 	}
 
 	/**

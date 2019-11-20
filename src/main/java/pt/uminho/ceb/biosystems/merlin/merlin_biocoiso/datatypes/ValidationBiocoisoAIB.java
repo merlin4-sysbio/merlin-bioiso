@@ -32,6 +32,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 	private Icon produced;
 	private Icon dontknow;
 	private Map<?, ?> nextLevel;
+	private Map<?, ?> entireMap;
 
 
 	/**
@@ -40,10 +41,11 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 	 */
 	
 
-	public ValidationBiocoisoAIB(WorkspaceTableAIB dbt, String name, Map<?, ?> nextLevel) {
+	public ValidationBiocoisoAIB(WorkspaceTableAIB dbt, String name, Map<?, ?> nextLevel, Map<?, ?> entireMap) {
 
 		super(dbt, name);
 		this.nextLevel = nextLevel;
+		this.entireMap = entireMap;
 		workspaceName = dbt.getWorkspaceName();
 		notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/notProducing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 		produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/producing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
@@ -51,7 +53,9 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 	}
 
 
-
+	public Map<?, ?> getEntireMap() {
+		return this.entireMap;
+	}
 
 	/* (non-Javadoc)
 	 * @see datatypes.metabolic_regulatory.Entity#getStats()

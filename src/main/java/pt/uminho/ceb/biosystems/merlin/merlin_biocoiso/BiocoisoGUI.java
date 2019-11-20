@@ -3,21 +3,20 @@ package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -37,19 +36,13 @@ import es.uvigo.ei.aibench.workbench.InputGUI;
 import es.uvigo.ei.aibench.workbench.ParamsReceiver;
 import es.uvigo.ei.aibench.workbench.Workbench;
 import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceAIB;
-import pt.uminho.ceb.biosystems.merlin.aibench.gui.CustomGUI;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.AIBenchUtils;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.CreateImageIcon;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLWriter;
+import pt.uminho.ceb.biosystems.merlin.core.containers.model.MetaboliteContainer;
 import pt.uminho.ceb.biosystems.merlin.core.containers.model.ReactionContainer;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelReactionsServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
-import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
-import pt.uminho.ceb.biosystems.mew.biocomponents.container.components.ReactionCI;
 
 /**
  * @author João Capela
@@ -90,7 +83,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	public JPanel getInputComponentsPane() {
 
 		List<ClipboardItem> cl = Core.getInstance().getClipboard().getItemsByClass(WorkspaceAIB.class);                    
-				
+
 		workspaces = new String[cl.size()];
 		for (int i = 0; i < cl.size(); i++) {
 
@@ -99,18 +92,18 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		this.models = new ExtendedJComboBox<String>(workspaces);
 		this.objective = new ExtendedJComboBox<String>(new String[0]);
 		this.url = new JTextField("https://bioiso.bio.di.uminho.pt");
-		
+
 		this.reaction = new ExtendedJComboBox<String>(new String[0]);
 		this.reaction.setEditable(true);
 		AutoCompleteDecorator.decorate(this.reaction);
-		
-		
+
+
 		if(this.models.getModel().getSize()>0)
 			this.setReactions();
-		
+
 		this.reaction.setEditable(true);
-        AutoCompleteDecorator.decorate(this.reaction);
-		
+		AutoCompleteDecorator.decorate(this.reaction);
+
 		String[] items = {
 				"maximize",
 				"minimize", 
@@ -121,7 +114,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				
+
 				setReactions();
 			}
 		});
@@ -143,7 +136,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				dispose();
-				
+
 				rec.paramsIntroduced(
 						new ParamSpec[]{
 								new ParamSpec("Workspace", String.class,models.getSelectedItem().toString(),null),
@@ -153,7 +146,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 						}
 						);
-				
+
 			}
 		};
 		okButton.addActionListener(listener);
@@ -170,8 +163,8 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 			//int result = CustomGUI.stopQuestion("cancel confirmation", "are you sure you want to cancel the operation?", options);
 
 			//if(result == 0) {
-				canceled = true;
-				dispose();
+			canceled = true;
+			dispose();
 			//}
 
 		});
@@ -189,7 +182,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 
 	}
-	
+
 	private InputParameter[] getInputParameters() {
 		InputParameter[] parameters = new InputParameter[4];
 		parameters[0] = 
@@ -218,7 +211,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 						url, 
 						"BioISO URL"
 						);
-		
+
 		return parameters;
 	}
 
@@ -230,7 +223,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		File biocoisoFile = new File(path.concat("biocoiso"));
 
 		try {
-			
+
 			if(biocoisoFile.exists()) {
 
 				try {
@@ -239,49 +232,112 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 					e.printStackTrace();
 				}
 			}
-			
+
 			biocoisoFile.mkdir();
+
+			Map<Integer, ReactionContainer> reactions_dic = ModelReactionsServices.getReactionsByReactionId(workspace.getName(), ProjectServices.isCompartmentalisedModel(workspace.getName()));
+
+			ArrayList<String> reactions_list = new ArrayList<String>();
+
+//			Container container = new Container(new ContainerBuilder(workspace.getName(), "model_".concat(workspace.getName()),
+//					ProjectServices.isCompartmentalisedModel(workspace.getName()), false, "", "e-biomass"));
+
+			Map<Integer, List<MetaboliteContainer>> reactionMetabolites = 
+					this.getStoichiometry(reactions_dic, 
+							ProjectServices.isCompartmentalisedModel(workspace.getName()));
+
+			for (int res : reactions_dic.keySet()) {
+				
+				if(reactionMetabolites.containsKey(res)) {
+					
+					if (reactions_dic.get(res).getLocalisation()==null) 
+						reactions_list.add(buildID("R_",reactions_dic.get(res).getExternalIdentifier(),"cytop"));
+					else
+						reactions_list.add(buildID("R_",reactions_dic.get(res).getExternalIdentifier(),reactions_dic.get(res).getLocalisation().getAbbreviation()));
+
+					
+				}
+
+			}
 			
-			Container container = new Container(new ContainerBuilder(workspace.getName(), "model_".concat(workspace.getName()),
-					ProjectServices.isCompartmentalisedModel(workspace.getName()), false, "", "e-biomass"));
+//			Map<String, ReactionCI> dictionary = container.getReactions();
+
+//			Set<String> reactions_test = dictionary.keySet();
+
+			String[] reactions_list_arr =  reactions_list.toArray(new String[0]);
 			
-			
-//			merlinSBML3Writer.writeToFile();
-			
-			Map<String, ReactionCI> dictionary = container.getReactions();
-			
-			String[] reactions = dictionary.keySet().toArray(new String[dictionary.size()]);
-			
-//			System.out.println("tamanho:"+reactions.length);
-			reaction.setModel(new DefaultComboBoxModel<>(reactions));
-			
-//			String databaseName = workspace.getDatabase().getWorkspaceName();
-//			
-//			List<ReactionContainer> reactionsNames = ModelReactionsServices.getReactions(databaseName, ProjectServices.isCompartmentalisedModel(workspace.getName()));
-//			
-//			System.out.println("--------tamanho: " + reactionsNames.size());
-//			for (String reactionName : reactionsNames) {
-//				
-//				int reactionId = ModelReactionsServices.getReactionID(reactionName, databaseName).get(0);
-//				
-//				System.out.println("----");
-//				
-//				System.out.println(reactionName);
-//				
-//				System.out.println(ModelReactionsServices.getReactionCompartment(databaseName, reactionId));
-//				
-//			}
-			
-			
+			reaction.setModel(new DefaultComboBoxModel<>(reactions_list_arr));
 		}
 		catch (Exception e1) {
 
 			Workbench.getInstance().warn("A problem was found when trying to find the reactions");;
 			e1.printStackTrace();
 		}
-		
-	
 	}
+
+	private Map<Integer, List<MetaboliteContainer>> getStoichiometry(Map<Integer, ReactionContainer> reactions, boolean isCompartmentalized) throws Exception {
+
+		WorkspaceAIB workspace = AIBenchUtils.getProject(models.getSelectedItem().toString());
+		
+		Map<Integer, List<MetaboliteContainer>> reactionMetabolites = new HashMap<>();
+		
+		List<String[]> result2 = ModelReactionsServices.getStoichiometryInfo(workspace.getName(), isCompartmentalized);
+		if(result2 != null) {
+
+			for(int i=0; i<result2.size(); i++) {
+
+				int idreaction = Integer.parseInt(result2.get(i)[1]);
+				int idMetabolite = Integer.parseInt(result2.get(i)[2]);
+				double stoichiometry = Double.parseDouble(result2.get(i)[3]);
+				String metaboliteName = result2.get(i)[4];
+				String formula = result2.get(i)[5];
+				String metaboliteExternalIdentifier = result2.get(i)[6];
+				String metaboliteCompartmentName = result2.get(i)[8];
+				int metaboliteIdCompartment = Integer.valueOf(result2.get(i)[9]);
+				String metaboliteCompartmentAbbreviation = result2.get(i)[10];
+
+				//				System.out.println(idreaction+" "+reactionName+" "+this.reactions.containsKey(idreaction));
+
+				if(reactions.containsKey(idreaction)) {
+
+					//					if(!list2[3].contains("m") && !list2[3].contains("n")) {
+
+					List<MetaboliteContainer> metabolitesContainer = new ArrayList<MetaboliteContainer>();
+
+					if(reactionMetabolites.containsKey(idreaction))
+						metabolitesContainer = reactionMetabolites.get(idreaction);
+
+					MetaboliteContainer metabolite = new MetaboliteContainer(idMetabolite, metaboliteName, formula, 
+							stoichiometry,metaboliteCompartmentName, metaboliteIdCompartment, metaboliteCompartmentAbbreviation, metaboliteExternalIdentifier);
+					metabolitesContainer.add(metabolite);
+
+					reactionMetabolites.put(idreaction, metabolitesContainer);
+				}
+			}
+			return reactionMetabolites;
+		}
+		return null;
+	}
+
+	private static String buildID(String prefix, String identifier, String compartment) {
+
+		if(compartment == null)
+			System.out.println("null compartment");
+
+		//		System.out.println(compartment);
+		//		System.out.println(identifier);
+		//		System.out.println(prefix);
+		//		
+		String output = identifier.concat("__").concat(compartment.toLowerCase());
+
+		if(!output.startsWith(prefix))
+			output = prefix.concat(output);
+
+		output = output.replace("-", "_").replace(":", "_").replace(" ", "_").replace("\t", "_").replace(".", "_").replace("+", "_");
+		return output;
+	}
+
+
 
 	@Override
 	public void setVisible(boolean b) {

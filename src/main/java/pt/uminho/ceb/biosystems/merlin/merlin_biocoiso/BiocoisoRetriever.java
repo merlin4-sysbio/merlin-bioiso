@@ -99,9 +99,9 @@ public class BiocoisoRetriever implements Observer {
 	@Port(direction=Direction.INPUT, name="url",description="default BioISO url", advanced=true, defaultValue = "https://bioiso.bio.di.uminho.pt", order = 4)
 	public void setURL(String url) throws Exception {
 		this.url = url;
-		
+
 		try {
-			
+
 
 			this.startTime = GregorianCalendar.getInstance().getTimeInMillis();
 
@@ -125,8 +125,6 @@ public class BiocoisoRetriever implements Observer {
 
 				logger.error("");
 				Workbench.getInstance().error("error while doing the operation! please try again");
-
-//				executeOperation();
 			}
 		}
 		catch(Exception e) {
@@ -158,11 +156,13 @@ public class BiocoisoRetriever implements Observer {
 				this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
 						Arrays.asList(columnsName), this.project.getName(), name);
 
-//		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
-//				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso_2.json", 
-//						Arrays.asList(columnsName), this.project.getName(), name);
+		//		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
+		//				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso_2.json", 
+		//						Arrays.asList(columnsName), this.project.getName(), name);
+		
+		Map<?, ?> entireMap = readJSON(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"));
 
-		ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name, filledTableAndNextLevel.getB());
+		ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name, filledTableAndNextLevel.getB(), entireMap);
 
 		biocoiso.setWorkspace(this.project);
 
@@ -216,7 +216,7 @@ public class BiocoisoRetriever implements Observer {
 				}
 
 				WorkspaceProcesses.createFaaFile(this.project.getName(), this.project.getTaxonomyID()); // method creates ".faa" files only if they do not exist
-			
+
 
 			} catch (Exception e) {
 				Workbench.getInstance().error(e);
@@ -235,7 +235,7 @@ public class BiocoisoRetriever implements Observer {
 	 * @throws Exception 
 	 */
 	public boolean submitFiles() throws Exception {
-		
+
 
 		File model = creationOfRequiredFiles();
 
@@ -250,7 +250,7 @@ public class BiocoisoRetriever implements Observer {
 		boolean verify = false;
 
 		try {
-			
+
 			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 1, 5, "submitting files...");
 
 			submissionID = post.postFiles();
@@ -324,9 +324,9 @@ public class BiocoisoRetriever implements Observer {
 								String line;
 
 								line = reader.readLine();
-								
+
 								reader.close();
-								
+
 								Workbench.getInstance().warn(line);
 								stop = true;
 								verify=false;
@@ -482,10 +482,10 @@ public class BiocoisoRetriever implements Observer {
 
 		File model = new File(biocoisoFolder.toString().concat("/model.xml"));
 
-//		if(model.exists()) {
-//			FileUtils.delete(model);
-//		}
-		
+		//		if(model.exists()) {
+		//			FileUtils.delete(model);
+		//		}
+
 		if(biocoisoFolder.exists()) {
 
 			try {
@@ -498,7 +498,7 @@ public class BiocoisoRetriever implements Observer {
 		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
 		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 5, "exporting the model...");
-		
+
 		Container container = new Container(new ContainerBuilder(this.project.getName(), "model_".concat(this.project.getName()),
 				ProjectServices.isCompartmentalisedModel(this.project.getName()), false, "", "e-biomass"));
 
@@ -564,6 +564,34 @@ public class BiocoisoRetriever implements Observer {
 
 	}
 
+	public static Map<?,?> readJSON(String file) {
+		JSONParser jsonParser = new JSONParser();
+
+		try (FileReader reader = new FileReader(file))
+		{
+			//Read JSON file
+			Object obj = (JSONObject) jsonParser.parse(reader);
+
+			JSONObject jo = (JSONObject) obj; 
+			Map<?, ?> res = (Map<?, ?>) jo;
+			return res;
+		}
+		catch (Exception e) {
+			logger.error(e.getMessage());
+			Workbench.getInstance().error(e);
+			e.printStackTrace();
+			
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void exportJSON(Map<?,?> entireMap) {
+		
+		JSONObject json = new JSONObject();
+	    json.putAll( entireMap );
+	}
+
 	/**
 	 * This method creates the data table with the results. This table will be rendered in BioISO's view.
 	 * @param file
@@ -577,19 +605,11 @@ public class BiocoisoRetriever implements Observer {
 
 	private Pair<WorkspaceGenericDataTable, Map<?,?>> createDataTable(String file, List<String> columnsNames, String name, String windowName) throws IOException, ParseException {
 
-		JSONParser jsonParser = new JSONParser();
-
-		try (FileReader reader = new FileReader(file))
-		{
-			//Read JSON file
-			Object obj = (JSONObject) jsonParser.parse(reader);
-
-			JSONObject jo = (JSONObject) obj; 
-			this.resultMap = (Map<?, ?>) jo; //level 1
+		
+			this.resultMap = readJSON(file);
 			Pair<WorkspaceGenericDataTable, Map<?,?>> tableAndNextLevel = this.tableCreator(resultMap, name, windowName, "M_fictitious");
-
 			return tableAndNextLevel;
-		}}
+	}
 
 
 	private Pair<WorkspaceGenericDataTable, Map<?,?>> tableCreator(Map<?,?> level, String name, String windowName, String metabolite) {
