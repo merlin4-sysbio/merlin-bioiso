@@ -43,6 +43,7 @@ import es.uvigo.ei.aibench.core.operation.annotation.Progress;
 import es.uvigo.ei.aibench.workbench.Workbench;
 import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceAIB;
 import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceTableAIB;
+import pt.uminho.ceb.biosystems.merlin.aibench.gui.CustomGUI;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.AIBenchUtils;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.TimeLeftProgress;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
@@ -115,8 +116,11 @@ public class BiocoisoRetriever implements Observer {
 				logger.info("The files for BioISO were submitted successfully");
 
 				Workbench.getInstance().info("The files for BioISO were submitted successfully");
-
-				executeOperation();
+				
+				if (!this.cancel.get())
+					executeOperation();
+				else
+					Workbench.getInstance().warn("operation canceled!");
 			}
 			else if(this.cancel.get()) {
 				Workbench.getInstance().warn("operation canceled!");
@@ -143,6 +147,7 @@ public class BiocoisoRetriever implements Observer {
 	}
 
 	private void executeOperation() throws IOException, ParseException {
+		
 
 		int table_number = this.project.getDatabase().getValidation().getEntities().size() + 1;
 
@@ -268,25 +273,7 @@ public class BiocoisoRetriever implements Observer {
 
 						responseCode = post.getStatus(submissionID);
 
-						System.out.println(responseCode);
-
-						if(responseCode == -1) { 
-							logger.error("Error!");
-							throw new Exception("Error!");
-
-						}
-						else if (responseCode==503) {
-							logger.error("The server cannot handle the submission due to capacity overload. Please try again later!");
-							throw new Exception("The server cannot handle the submission due to capacity overload. Please try again later!");
-						}
-						else if (responseCode==500) {
-							logger.error("Something went wrong while processing the request, please try again");
-							throw new Exception("Something went wrong while processing the request, please try again");
-						}
-						else if (responseCode == 400) {
-							logger.error("The submitted files are fewer than expected");
-							throw new Exception("The submitted files are fewer than expected");
-						}
+						this.showWorkbechMessagesIfError(responseCode);
 
 						TimeUnit.SECONDS.sleep(3);
 					}
@@ -294,10 +281,9 @@ public class BiocoisoRetriever implements Observer {
 
 					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 3, 5, "downloading BioISO results");
 
-					if(!this.cancel.get())
+					if(!this.cancel.get()) {
 						verify = post.downloadFile(submissionID, getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME).concat("/results.zip"));
-
-
+					
 					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 5, "verifying...");
 
 					biocoisoResultsFile = getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME).concat("/results/");
@@ -341,6 +327,8 @@ public class BiocoisoRetriever implements Observer {
 
 					return verify;
 				}
+				}
+				
 				catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -355,6 +343,29 @@ public class BiocoisoRetriever implements Observer {
 
 		}
 		return verify;
+	}
+	
+	
+	private void showWorkbechMessagesIfError(int responseCode) throws Exception {
+		
+		if(responseCode == -1) { 
+			logger.error("Error!");
+			throw new Exception("Error!");
+
+		}
+		else if (responseCode==503) {
+			logger.error("The server cannot handle the submission due to capacity overload. Please try again later!");
+			throw new Exception("The server cannot handle the submission due to capacity overload. Please try again later!");
+		}
+		else if (responseCode==500) {
+			logger.error("Something went wrong while processing the request, please try again");
+			throw new Exception("Something went wrong while processing the request, please try again");
+		}
+		else if (responseCode == 400) {
+			logger.error("The submitted files are fewer than expected");
+			throw new Exception("The submitted files are fewer than expected");
+		}
+		
 	}
 
 	/**
@@ -693,9 +704,20 @@ public class BiocoisoRetriever implements Observer {
 	 */
 	@Cancel
 	public void setCancel() {
+		
+		String[] options = new String[2];
+		options[0] = "yes";
+		options[1] = "no";
+
+		int result = CustomGUI.stopQuestion("cancel confirmation", "are you sure you want to cancel the operation?", options);
+
+		if(result == 0) {
+			this.cancel.set(true);
+		}
 
 		progress.setTime(0, 0, 0);
-		this.cancel.set(true);
+		
+		
 	}
 
 	/* (non-Javadoc)

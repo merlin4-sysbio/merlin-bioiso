@@ -36,6 +36,7 @@ import es.uvigo.ei.aibench.workbench.InputGUI;
 import es.uvigo.ei.aibench.workbench.ParamsReceiver;
 import es.uvigo.ei.aibench.workbench.Workbench;
 import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceAIB;
+import pt.uminho.ceb.biosystems.merlin.aibench.gui.CustomGUI;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.AIBenchUtils;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.CreateImageIcon;
 import pt.uminho.ceb.biosystems.merlin.core.containers.model.MetaboliteContainer;
@@ -156,16 +157,16 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		cancelButton.setIcon(new CreateImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Cancel.png")),0.7).resizeImageIcon());
 		cancelButton.addActionListener(event -> {
 
-			//String[] options = new String[2];
-			//options[0] = "yes";
-			//options[1] = "no";
+			String[] options = new String[2];
+			options[0] = "yes";
+			options[1] = "no";
 
-			//int result = CustomGUI.stopQuestion("cancel confirmation", "are you sure you want to cancel the operation?", options);
+			int result = CustomGUI.stopQuestion("cancel confirmation", "are you sure you want to cancel the operation?", options);
 
-			//if(result == 0) {
+			if(result == 0) {
 			canceled = true;
 			dispose();
-			//}
+			}
 
 		});
 
@@ -216,12 +217,14 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	}
 
 	public void setReactions() {
-
+		
+	
 		WorkspaceAIB workspace = AIBenchUtils.getProject(models.getSelectedItem().toString());
 
 		String path = FileUtils.getWorkspaceTaxonomyFolderPath(workspace.getName(), workspace.getTaxonomyID());
 		File biocoisoFile = new File(path.concat("biocoiso"));
-
+		
+		
 		try {
 
 			if(biocoisoFile.exists()) {
@@ -267,6 +270,10 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 			String[] reactions_list_arr =  reactions_list.toArray(new String[0]);
 			
 			reaction.setModel(new DefaultComboBoxModel<>(reactions_list_arr));
+			
+			if (reactions_list_arr.length==0){
+				Workbench.getInstance().info("Please choose a workspace with reactions.");
+			}
 		}
 		catch (Exception e1) {
 
