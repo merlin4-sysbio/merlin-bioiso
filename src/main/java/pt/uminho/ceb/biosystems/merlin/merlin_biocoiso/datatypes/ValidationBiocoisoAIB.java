@@ -5,8 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.Icon;
@@ -14,13 +12,12 @@ import javax.swing.ImageIcon;
 
 import org.json.simple.parser.ParseException;
 
-
 import es.uvigo.ei.aibench.core.datatypes.annotation.Datatype;
 import es.uvigo.ei.aibench.core.datatypes.annotation.Structure;
-import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceTableAIB;
-import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.interfaces.IEntityAIB;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
+import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceTableAIB;
+import pt.uminho.ceb.biosystems.merlin.gui.datatypes.interfaces.IEntityAIB;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoiso;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
