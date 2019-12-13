@@ -25,7 +25,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import es.uvigo.ei.aibench.workbench.Workbench;
-import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceAIB;
+import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceAIB;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;

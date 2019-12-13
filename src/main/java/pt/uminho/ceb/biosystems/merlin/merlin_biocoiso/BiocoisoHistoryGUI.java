@@ -16,7 +16,7 @@ import javax.swing.UIManager;
 
 import es.uvigo.ei.aibench.workbench.Workbench;
 import es.uvigo.ei.aibench.workbench.utilities.Utilities;
-import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceAIB;
+import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceAIB;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 
 public class BiocoisoHistoryGUI extends JDialog{

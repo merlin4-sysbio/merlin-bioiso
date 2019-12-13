@@ -29,12 +29,11 @@ import javax.swing.table.TableColumnModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import es.uvigo.ei.aibench.workbench.Workbench;
-import pt.uminho.ceb.biosystems.merlin.aibench.utilities.ButtonColumn;
-import pt.uminho.ceb.biosystems.merlin.aibench.utilities.CreateImageIcon;
-import pt.uminho.ceb.biosystems.merlin.aibench.utilities.ExportToXLS;
-import pt.uminho.ceb.biosystems.merlin.aibench.utilities.MyJTable;
-import pt.uminho.ceb.biosystems.merlin.aibench.utilities.SearchInTable;
-import pt.uminho.ceb.biosystems.merlin.aibench.views.WorkspaceUpdatablePanel;
+import pt.uminho.ceb.biosystems.merlin.gui.utilities.ButtonColumn;
+import pt.uminho.ceb.biosystems.merlin.gui.utilities.CreateImageIcon;
+import pt.uminho.ceb.biosystems.merlin.gui.utilities.MyJTable;
+import pt.uminho.ceb.biosystems.merlin.gui.utilities.SearchInTable;
+import pt.uminho.ceb.biosystems.merlin.gui.views.WorkspaceUpdatablePanel;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;

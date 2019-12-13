@@ -27,10 +27,9 @@ import javax.swing.border.SoftBevelBorder;
 
 import es.uvigo.ei.aibench.workbench.Workbench;
 import es.uvigo.ei.aibench.workbench.utilities.Utilities;
-import pt.uminho.ceb.biosystems.merlin.aibench.utilities.ButtonColumn;
-import pt.uminho.ceb.biosystems.merlin.aibench.utilities.MyJTable;
-import pt.uminho.ceb.biosystems.merlin.aibench.views.windows.GenericDetailWindow;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
+import pt.uminho.ceb.biosystems.merlin.gui.utilities.ButtonColumn;
+import pt.uminho.ceb.biosystems.merlin.gui.utilities.MyJTable;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
