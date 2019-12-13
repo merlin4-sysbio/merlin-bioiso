@@ -41,14 +41,10 @@ import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceTableAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.jpanels.CustomGUI;
 import pt.uminho.ceb.biosystems.merlin.gui.utilities.AIBenchUtils;
 import pt.uminho.ceb.biosystems.merlin.gui.utilities.TimeLeftProgress;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.SequenceType;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.merlin.processes.WorkspaceProcesses;
-import pt.uminho.ceb.biosystems.merlin.services.DatabaseServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelSequenceServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
@@ -112,7 +108,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 
 			if (submitted && !this.cancel.get()) {
 
-				this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 6, 6, "Rendering results...");
+				this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 5, 5, "Rendering results...");
 
 				logger.info("The files for BioISO were submitted successfully");
 
@@ -259,7 +255,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 
 		try {
 
-			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 2, 6, "submitting files...");
+			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 1, 5, "submitting files...");
 
 			submissionID = post.postFiles();
 
@@ -269,7 +265,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 					logger.info("SubmissionID attributed: {}", submissionID);
 					int responseCode = -1;
 
-					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 3, 6, 
+					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 2, 5, 
 							"files submitted, waiting for results...");
 
 					while (responseCode!=200 &&  !this.cancel.get()) {
@@ -283,12 +279,12 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 
 					File results_file = BiocoisoUtils.getLatestFilefromDir(getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME));
 
-					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 6, "downloading BioISO results");
+					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 3, 5, "downloading BioISO results");
 
 					if(!this.cancel.get()) {
 						verify = post.downloadFile(submissionID, results_file.getAbsolutePath().concat("/results.zip"));
 
-						this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 5, 6, "verifying...");
+						this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 5, "verifying...");
 
 
 						biocoisoResultsFile = results_file.getAbsolutePath().concat("/results/");
@@ -449,15 +445,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 		BiocoisoUtils.writeTextInFile(this.commit, new File(newFileBiocoiso+"/commit.txt"));
 		File model = new File(newFileBiocoiso.concat("/model.xml"));
 
-		if (this.backup) {
-
-			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 6, "backuping model...");
-
-			this.createBackup(newFileBiocoiso);
-		}
-
-
-		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 1, 6, "exporting the model...");
+		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 5, "exporting the model...");
 
 		BiocoisoUtils.exportModel(this.project, newFileBiocoiso);
 
@@ -472,24 +460,24 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 	}
 	
 
-	private void createBackup(String newFileBiocoiso) throws Exception {
-		
-		BiocoisoUtils.backupWorkspaceFolder(newFileBiocoiso, this.project);
-
-		String backupXmlTables = newFileBiocoiso +"/"+this.project.getName() +"/tables/";
-
-		File newFile = new File(backupXmlTables);
-
-		if(!newFile.exists())
-			newFile.mkdirs();
-
-
-		DatabaseServices.databaseToXML(this.project.getName(), backupXmlTables,this);
-		
-		String file = newFileBiocoiso.concat("/"+this.project.getName());
-
-		BiocoisoUtils.zipBackupFiles(new File(file),newFileBiocoiso);
-	}
+//	private void createBackup(String newFileBiocoiso) throws Exception {
+//		
+//		BiocoisoUtils.backupWorkspaceFolder(newFileBiocoiso, this.project);
+//
+//		String backupXmlTables = newFileBiocoiso +"/"+this.project.getName() +"/tables/";
+//
+//		File newFile = new File(backupXmlTables);
+//
+//		if(!newFile.exists())
+//			newFile.mkdirs();
+//
+//
+//		DatabaseServices.databaseToXML(this.project.getName(), backupXmlTables,this);
+//		
+//		String file = newFileBiocoiso.concat("/"+this.project.getName());
+//
+//		BiocoisoUtils.zipBackupFiles(new File(file),newFileBiocoiso);
+//	}
 	
 
 	@SuppressWarnings("unchecked")
