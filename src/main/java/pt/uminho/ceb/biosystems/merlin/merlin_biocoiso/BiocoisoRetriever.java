@@ -2,24 +2,20 @@ package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
 
 
 import java.awt.Image;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Observer;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,7 +24,6 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,17 +41,13 @@ import pt.uminho.ceb.biosystems.merlin.aibench.datatypes.WorkspaceTableAIB;
 import pt.uminho.ceb.biosystems.merlin.aibench.gui.CustomGUI;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.AIBenchUtils;
 import pt.uminho.ceb.biosystems.merlin.aibench.utilities.TimeLeftProgress;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.SequenceType;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.merlin.processes.WorkspaceProcesses;
-import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
+import pt.uminho.ceb.biosystems.merlin.services.DatabaseServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelSequenceServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
-import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 
@@ -65,7 +56,7 @@ import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
  *
  */
 @Operation(name="BioISO",description="Get results from BioISO")
-public class BiocoisoRetriever implements Observer {
+public class BiocoisoRetriever implements PropertyChangeListener {
 
 	private WorkspaceAIB project;
 	private TimeLeftProgress progress = new TimeLeftProgress();
@@ -78,11 +69,12 @@ public class BiocoisoRetriever implements Observer {
 	private String biocoisoResultsFile;
 	private String reaction;
 	final static Logger logger = LoggerFactory.getLogger(BiocoisoRetriever.class);
-	private Map<?,?> resultMap;
 	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/notProducing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/producing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	private String objective;
 	private String url;
+	private boolean backup;
+	private String commit;
 
 
 
@@ -98,8 +90,14 @@ public class BiocoisoRetriever implements Observer {
 	}
 
 	@Port(direction=Direction.INPUT, name="url",description="default BioISO url", advanced=true, defaultValue = "https://bioiso.bio.di.uminho.pt", order = 4)
-	public void setURL(String url) throws Exception {
+	public void setURL(String url) throws Exception{
 		this.url = url;
+	}
+
+	@Port(direction=Direction.INPUT, name="Backup",description="Backup model", order = 5)
+	public void setCommit(String commit) throws Exception {
+
+		this.commit = commit;
 
 		try {
 
@@ -111,12 +109,12 @@ public class BiocoisoRetriever implements Observer {
 
 			if (submitted && !this.cancel.get()) {
 
-				this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 5, 5, "Rendering results...");
+				this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 6, 6, "Rendering results...");
 
 				logger.info("The files for BioISO were submitted successfully");
 
 				Workbench.getInstance().info("The files for BioISO were submitted successfully");
-				
+
 				if (!this.cancel.get())
 					executeOperation();
 				else
@@ -147,7 +145,7 @@ public class BiocoisoRetriever implements Observer {
 	}
 
 	private void executeOperation() throws IOException, ParseException {
-		
+
 
 		int table_number = this.project.getDatabase().getValidation().getEntities().size() + 1;
 
@@ -157,15 +155,17 @@ public class BiocoisoRetriever implements Observer {
 
 		WorkspaceTableAIB table = new WorkspaceTableAIB(name, columnsName , this.project.getName());
 
+		File results_file = BiocoisoUtils.getLatestFilefromDir(getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME));
+
 		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
-				this.createDataTable(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
-						Arrays.asList(columnsName), this.project.getName(), name);
+				BiocoisoUtils.createDataTable(results_file.getAbsolutePath().concat("/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
+						Arrays.asList(columnsName), this.project.getName(), name,produced,notProduced);
 
 		//		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
 		//				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso_2.json", 
 		//						Arrays.asList(columnsName), this.project.getName(), name);
-		
-		Map<?, ?> entireMap = readJSON(this.getWorkDirectory().concat("/biocoiso/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"));
+
+		Map<?, ?> entireMap = BiocoisoUtils.readJSON(results_file.getAbsolutePath().concat("/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"));
 
 		ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name, filledTableAndNextLevel.getB(), entireMap);
 
@@ -256,7 +256,7 @@ public class BiocoisoRetriever implements Observer {
 
 		try {
 
-			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 1, 5, "submitting files...");
+			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 2, 6, "submitting files...");
 
 			submissionID = post.postFiles();
 
@@ -266,7 +266,7 @@ public class BiocoisoRetriever implements Observer {
 					logger.info("SubmissionID attributed: {}", submissionID);
 					int responseCode = -1;
 
-					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 2, 5, 
+					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 3, 6, 
 							"files submitted, waiting for results...");
 
 					while (responseCode!=200 &&  !this.cancel.get()) {
@@ -278,57 +278,59 @@ public class BiocoisoRetriever implements Observer {
 						TimeUnit.SECONDS.sleep(3);
 					}
 
+					File results_file = BiocoisoUtils.getLatestFilefromDir(getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME));
 
-					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 3, 5, "downloading BioISO results");
+					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 6, "downloading BioISO results");
 
 					if(!this.cancel.get()) {
-						verify = post.downloadFile(submissionID, getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME).concat("/results.zip"));
-					
-					this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 4, 5, "verifying...");
+						verify = post.downloadFile(submissionID, results_file.getAbsolutePath().concat("/results.zip"));
 
-					biocoisoResultsFile = getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME).concat("/results/");
+						this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 5, 6, "verifying...");
 
-					FileUtils.extractZipFile(getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME).concat("/results.zip"), biocoisoResultsFile);
 
-					File checksumFile = new File(biocoisoResultsFile.concat("/checksum.md5"));
+						biocoisoResultsFile = results_file.getAbsolutePath().concat("/results/");
 
-					if (!checksumFile.exists()) {
+						FileUtils.extractZipFile(results_file.getAbsolutePath().concat("/results.zip"), biocoisoResultsFile);
 
-						File folder = new File(biocoisoResultsFile);
-						File[] listOfFiles = folder.listFiles();
+						File checksumFile = new File(biocoisoResultsFile.concat("/checksum.md5"));
 
-						boolean stop=false;
+						if (!checksumFile.exists()) {
 
-						int i = 0;
+							File folder = new File(biocoisoResultsFile);
+							File[] listOfFiles = folder.listFiles();
 
-						//The following code will show different error and warning messages to merlin users depending on the error founded
+							boolean stop=false;
 
-						while (!stop && i<listOfFiles.length) {
-							if (listOfFiles[i].getName().equals("error_message") ) {
-								BufferedReader reader = new BufferedReader(new FileReader(folder+"/error_message"));
+							int i = 0;
 
-								String line;
+							//The following code will show different error and warning messages to merlin users depending on the error founded
 
-								line = reader.readLine();
+							while (!stop && i<listOfFiles.length) {
+								if (listOfFiles[i].getName().equals("error_message") ) {
+									BufferedReader reader = new BufferedReader(new FileReader(folder+"/error_message"));
 
-								reader.close();
+									String line;
 
-								Workbench.getInstance().warn(line);
-								stop = true;
-								verify=false;
+									line = reader.readLine();
+
+									reader.close();
+
+									Workbench.getInstance().warn(line);
+									stop = true;
+									verify=false;
+								}
+								i++;
 							}
-							i++;
 						}
-					}
-					else if (verify) {
-						verify=verifyKeys();
-						logger.info("The result of the verification of md5 file was {}", Boolean.toString(verify));
-					}
+						else if (verify) {
+							verify=verifyKeys();
+							logger.info("The result of the verification of md5 file was {}", Boolean.toString(verify));
+						}
 
-					return verify;
+						return verify;
+					}
 				}
-				}
-				
+
 				catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -344,10 +346,10 @@ public class BiocoisoRetriever implements Observer {
 		}
 		return verify;
 	}
-	
-	
+
+
 	private void showWorkbechMessagesIfError(int responseCode) throws Exception {
-		
+
 		if(responseCode == -1) { 
 			logger.error("Error!");
 			throw new Exception("Error!");
@@ -365,7 +367,7 @@ public class BiocoisoRetriever implements Observer {
 			logger.error("The submitted files are fewer than expected");
 			throw new Exception("The submitted files are fewer than expected");
 		}
-		
+
 	}
 
 	/**
@@ -391,96 +393,34 @@ public class BiocoisoRetriever implements Observer {
 	 */
 	private boolean verifyKeys() throws IOException, NoSuchAlgorithmException {
 
-		String path = getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME+"/results");
-
-		MessageDigest md5Digest = MessageDigest.getInstance("MD5");
-
-		File file = new File(path.concat("/results_".concat(BIOCOISO_FILE_NAME).concat(".json")));
-
-		String checksum = getFileChecksum(md5Digest, file);
-
-		String key = readWordInFile(path.concat("/checksum.md5"));
-
-		if(checksum.equals(key)) {
-			return true;
-		}
-		else {
-			logger.error("While verifying the checksum of the xml file, a error was found.");
-			return false;
-		}
-	}
-
-	/**
-	 * This method read a word in a file
-	 * @param path: {@code String} with the path for the file
-	 * @return String which is the word in the file
-	 */
-
-	public static String readWordInFile(String path){
-
 		try {
 
-			BufferedReader reader = new BufferedReader(new FileReader(path));
+			File results_file = BiocoisoUtils.getLatestFilefromDir(getWorkDirectory().concat("/"+BIOCOISO_FILE_NAME));
 
-			String line;
+			String path = results_file.getAbsolutePath() +"/results";
 
-			while ((line = reader.readLine()) != null) {
+			MessageDigest md5Digest = MessageDigest.getInstance("MD5");
 
-				if(!line.isEmpty() &&  !line.contains("**")) {
+			File file = new File(path.concat("/results_".concat(BIOCOISO_FILE_NAME).concat(".json")));
 
-					reader.close();
-					return line.trim();
-				}
+			String checksum = BiocoisoUtils.getFileChecksum(md5Digest, file);
+
+			String key = BiocoisoUtils.readWordInFile(path.concat("/checksum.md5"));
+
+			if(checksum.equals(key)) {
+				return true;
 			}
-
-			reader.close();
-
-		} 
-		catch (IOException e) {
-			e.printStackTrace();
+			else {
+				logger.error("While verifying the checksum of the xml file, a error was found.");
+				return false;
+			} 
+		}
+		catch (Exception e) {
+			return false;
 		}
 
-		return null;
 	}
 
-	/**
-	 * This method generates a checksum key for the downloaded files 
-	 * @param digest
-	 * @param file
-	 * @return String
-	 * @throws IOException
-	 */
-	private static String getFileChecksum(MessageDigest digest, File file) throws IOException
-	{
-		//Get file input stream for reading the file content
-		FileInputStream fis = new FileInputStream(file);
-
-		//Create byte array to read data in chunks
-		byte[] byteArray = new byte[1024];
-		int bytesCount = 0;
-
-		//Read file data and update in message digest
-		while ((bytesCount = fis.read(byteArray)) != -1) {
-			digest.update(byteArray, 0, bytesCount);
-		};
-
-		//close the stream; We don't need it now.
-		fis.close();
-
-		//Get the hash's bytes
-		byte[] bytes = digest.digest();
-
-		//This bytes[] has bytes in decimal format;
-		//Convert it to hexadecimal format
-		StringBuilder sb = new StringBuilder();
-		for(int i=0; i< bytes.length ;i++)
-		{
-			sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
-		}
-
-		//return complete hash
-		return sb.toString();
-	}
 
 	/**
 	 * This method generates the required files for BioISO to run. A file with the biomass reaction id, another with the protein's name and the model.
@@ -491,33 +431,32 @@ public class BiocoisoRetriever implements Observer {
 
 		File biocoisoFolder = new File(getWorkDirectory().concat("/biocoiso"));
 
-		File model = new File(biocoisoFolder.toString().concat("/model.xml"));
+		if (!biocoisoFolder.exists())
+			biocoisoFolder.mkdir();
 
-		//		if(model.exists()) {
-		//			FileUtils.delete(model);
-		//		}
+		LocalDateTime currentTime = LocalDateTime.now();
 
-		if(biocoisoFolder.exists()) {
+		String date = "_" + currentTime.getHour() + "h" + currentTime.getMinute() + "m" + currentTime.getSecond() + "s"
+				+ currentTime.getDayOfMonth() + currentTime.getMonthValue() + currentTime.getYear();
 
-			try {
-				org.apache.commons.io.FileUtils.deleteDirectory(biocoisoFolder);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+		String newFileBiocoiso = biocoisoFolder.getAbsolutePath().concat("/biocoiso"+date);
+		
+		FileUtils.createFoldersFromPath(newFileBiocoiso);
+		
+		BiocoisoUtils.writeTextInFile(this.commit, new File(newFileBiocoiso+"/commit.txt"));
+		File model = new File(newFileBiocoiso.concat("/model.xml"));
+
+		if (this.backup) {
+
+			this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 6, "backuping model...");
+
+			this.createBackup(newFileBiocoiso);
 		}
 
-		biocoisoFolder.mkdir(); //creation of a directory to put the required files
 
-		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 0, 5, "exporting the model...");
+		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, 1, 6, "exporting the model...");
 
-		Container container = new Container(new ContainerBuilder(this.project.getName(), "model_".concat(this.project.getName()),
-				ProjectServices.isCompartmentalisedModel(this.project.getName()), false, "", "e-biomass"));
-
-		SBMLLevel3Writer merlinSBML3Writer = new SBMLLevel3Writer(biocoisoFolder.toString().concat("/model.xml"), 
-				container, "", false, null, true, SBMLLevelVersion.L3V1, true);
-
-		merlinSBML3Writer.writeToFile();
-
+		BiocoisoUtils.exportModel(this.project, newFileBiocoiso);
 
 		if (model.exists() ) {
 
@@ -528,167 +467,36 @@ public class BiocoisoRetriever implements Observer {
 			return null;
 
 	}
+	
 
-	/**
-	 * This method saves words in a given file.
-	 * @param path: {@code String} with the file path
-	 * @param words: {@code List<String>} with words to put in the given file
-	 */
-	public static void saveWordsInFile(String path, List<String> words){
+	private void createBackup(String newFileBiocoiso) throws Exception {
+		
+		BiocoisoUtils.backupWorkspaceFolder(newFileBiocoiso, this.project);
 
-		try {
+		String backupXmlTables = newFileBiocoiso +"/"+this.project.getName() +"/tables/";
 
-			PrintWriter writer = new PrintWriter(path, "UTF-8");
+		File newFile = new File(backupXmlTables);
 
-			for(String word : words)
-				writer.println(word);
-
-			writer.close();
-
-		} 
-		catch (FileNotFoundException e) {
-			e.printStackTrace();
-
-		} 
-		catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void saveWordInFile(String path, String word) {
-
-		PrintWriter writer;
-
-		try {
-
-			writer = new PrintWriter(path, "UTF-8");
-
-			writer.print(word);
-
-			writer.close();
-
-		} catch (FileNotFoundException | UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		if(!newFile.exists())
+			newFile.mkdirs();
 
 
-	}
+		DatabaseServices.databaseToXML(this.project.getName(), backupXmlTables,this);
+		
+		String file = newFileBiocoiso.concat("/"+this.project.getName());
 
-	public static Map<?,?> readJSON(String file) {
-		JSONParser jsonParser = new JSONParser();
-
-		try (FileReader reader = new FileReader(file))
-		{
-			//Read JSON file
-			Object obj = (JSONObject) jsonParser.parse(reader);
-
-			JSONObject jo = (JSONObject) obj; 
-			Map<?, ?> res = (Map<?, ?>) jo;
-			return res;
-		}
-		catch (Exception e) {
-			logger.error(e.getMessage());
-			Workbench.getInstance().error(e);
-			e.printStackTrace();
-			
-		}
-		return null;
+		BiocoisoUtils.zipBackupFiles(new File(file),newFileBiocoiso);
 	}
 	
+
 	@SuppressWarnings("unchecked")
 	public static void exportJSON(Map<?,?> entireMap) {
-		
+
 		JSONObject json = new JSONObject();
-	    json.putAll( entireMap );
+		json.putAll( entireMap );
 	}
 
-	/**
-	 * This method creates the data table with the results. This table will be rendered in BioISO's view.
-	 * @param file
-	 * @param columnsNames
-	 * @param name
-	 * @param windowName
-	 * @return WorkspaceGenericDataTable with the results.
-	 * @throws IOException
-	 * @throws ParseException 
-	 */
-
-	private Pair<WorkspaceGenericDataTable, Map<?,?>> createDataTable(String file, List<String> columnsNames, String name, String windowName) throws IOException, ParseException {
-
-		
-			this.resultMap = readJSON(file);
-			Pair<WorkspaceGenericDataTable, Map<?,?>> tableAndNextLevel = this.tableCreator(resultMap, name, windowName, "M_fictitious");
-			return tableAndNextLevel;
-	}
-
-
-	private Pair<WorkspaceGenericDataTable, Map<?,?>> tableCreator(Map<?,?> level, String name, String windowName, String metabolite) {
-
-		String[] columnsName = new String[] {"info","metabolite", "reaction", "role", "analysis"};
-
-		WorkspaceGenericDataTable newTable = new WorkspaceGenericDataTable(Arrays.asList(columnsName) , name , windowName) {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public boolean isCellEditable(int row, int col){
-				if (col==0)
-				{
-					return true;
-				}
-				else return false;
-			}
-		}; 
-
-
-		for (Object met : level.keySet()) {
-
-			Map<?,?>  nextMap = (Map<?, ?>) level.get(met);
-
-			Map<?,?> nextLevel = (Map<?, ?>) nextMap.get("next");
-
-			@SuppressWarnings("unchecked")
-			Set<String> next = (Set<String>) nextLevel.keySet();
-			for (String key : next) {
-
-				Map<?, ?> level2 = (Map<?, ?>) ((Map<?, ?>) nextLevel.get(key));
-
-				Object[] res = createLineFromMap(level2,key);
-
-				newTable.addLine(res);
-
-			}
-			Pair<WorkspaceGenericDataTable, Map<?,?>> res = new Pair<WorkspaceGenericDataTable, Map<?,?>>(newTable,nextLevel);
-			return res;
-		}
-		return null;
-	}
-
-	private Object[] createLineFromMap(Map<?,?> keyMap, String key) {
-
-		Object[] res = new Object[5];
-
-		res[1]=key;
-
-		boolean flux = (boolean) keyMap.get("flux");
-
-		@SuppressWarnings("unchecked")
-		ArrayList<ArrayList<String>> childrenList = (ArrayList<ArrayList<String>>) keyMap.get("children");
-
-		res[2]= Integer.toString(childrenList.size());
-
-		res[3]=keyMap.get("side");
-
-		if (flux) {
-			res[4] = produced;
-		}
-		else {
-			res[4] = notProduced;
-		}
-		return res;
-	}
-
-
+	
 
 	/**
 	 * @return the progress
@@ -704,7 +512,7 @@ public class BiocoisoRetriever implements Observer {
 	 */
 	@Cancel
 	public void setCancel() {
-		
+
 		String[] options = new String[2];
 		options[0] = "yes";
 		options[1] = "no";
@@ -714,10 +522,11 @@ public class BiocoisoRetriever implements Observer {
 		if(result == 0) {
 			this.cancel.set(true);
 		}
+		
 
 		progress.setTime(0, 0, 0);
-		
-		
+
+
 	}
 
 	/* (non-Javadoc)
@@ -726,6 +535,12 @@ public class BiocoisoRetriever implements Observer {
 	public void update(Observable o, Object arg) {
 
 		this.progress.setTime(GregorianCalendar.getInstance().getTimeInMillis() - this.startTime, this.counter.get(), this.querySize.get(), message);
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		// TODO Auto-generated method stub
+
 	}
 
 

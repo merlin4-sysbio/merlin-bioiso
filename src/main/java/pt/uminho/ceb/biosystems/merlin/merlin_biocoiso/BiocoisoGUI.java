@@ -17,8 +17,10 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
@@ -64,7 +66,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	private String[] workspaces;
 
 
-
+	private JTextArea commit;
 
 	public BiocoisoGUI() {
 
@@ -98,6 +100,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		this.reaction.setEditable(true);
 		AutoCompleteDecorator.decorate(this.reaction);
 
+		this.commit = new JTextArea(); 
 
 		if(this.models.getModel().getSize()>0)
 			this.setReactions();
@@ -143,7 +146,8 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 								new ParamSpec("Workspace", String.class,models.getSelectedItem().toString(),null),
 								new ParamSpec("Reaction", String.class,reaction.getSelectedItem().toString(),null),
 								new ParamSpec("Objective", String.class,objective.getSelectedItem().toString(),null),
-								new ParamSpec("url", String.class,url.getText(),null)
+								new ParamSpec("url", String.class,url.getText(),null),
+								new ParamSpec("Commit", boolean.class,commit.getText(),null)
 
 						}
 						);
@@ -185,7 +189,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	}
 
 	private InputParameter[] getInputParameters() {
-		InputParameter[] parameters = new InputParameter[4];
+		InputParameter[] parameters = new InputParameter[5];
 		parameters[0] = 
 
 				new InputParameter(
@@ -212,7 +216,14 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 						url, 
 						"BioISO URL"
 						);
-
+		
+		parameters[4] = 
+				new InputParameter(
+						"Commit", 
+						commit, 
+						"Commit"
+						);
+		
 		return parameters;
 	}
 
@@ -227,16 +238,16 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		
 		try {
 
-			if(biocoisoFile.exists()) {
+			if(!biocoisoFile.exists()) {
 
 				try {
-					FileUtils.deleteDirectory(biocoisoFile);
+					biocoisoFile.mkdir();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 
-			biocoisoFile.mkdir();
+			
 
 			Map<Integer, ReactionContainer> reactions_dic = ModelReactionsServices.getReactionsByReactionId(workspace.getName(), ProjectServices.isCompartmentalisedModel(workspace.getName()));
 
@@ -365,6 +376,10 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	public void onValidationError(Throwable arg0) {
 
 		Workbench.getInstance().error(arg0);
+	}
+	
+	public JTextArea getCommit() {
+		return this.commit;
 	}
 
 	@Override
