@@ -438,7 +438,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 		String date = "_" + currentTime.getHour() + "h" + currentTime.getMinute() + "m" + currentTime.getSecond() + "s"
 				+ currentTime.getDayOfMonth() + currentTime.getMonthValue() + currentTime.getYear();
 
-		String newFileBiocoiso = biocoisoFolder.getAbsolutePath().concat("/biocoiso"+date);
+		String newFileBiocoiso = biocoisoFolder.getAbsolutePath().concat("/"+this.reaction+date);
 		
 		FileUtils.createFoldersFromPath(newFileBiocoiso);
 		

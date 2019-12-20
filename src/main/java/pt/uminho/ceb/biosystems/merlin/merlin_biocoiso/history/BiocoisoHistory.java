@@ -1,4 +1,4 @@
-package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
+package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.history;
 
 import es.uvigo.ei.aibench.core.operation.annotation.Direction;
 import es.uvigo.ei.aibench.core.operation.annotation.Operation;
