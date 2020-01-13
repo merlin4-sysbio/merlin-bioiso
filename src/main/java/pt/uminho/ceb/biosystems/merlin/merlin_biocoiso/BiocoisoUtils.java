@@ -255,7 +255,7 @@ public class BiocoisoUtils {
 
 		res[1]=key;
 
-		boolean flux = (boolean) keyMap.get("flux");
+		Boolean flux = (Boolean) keyMap.get("flux");
 
 		@SuppressWarnings("unchecked")
 		ArrayList<ArrayList<String>> childrenList = (ArrayList<ArrayList<String>>) keyMap.get("children");

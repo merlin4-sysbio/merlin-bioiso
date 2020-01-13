@@ -194,7 +194,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 			if (next.get(reactantOrProduct)!=null) {
 
 				ArrayList<ArrayList<String>> reactions = (ArrayList<ArrayList<String>>) ((Map<?, ?>) next.get(reactantOrProduct)).get("children");
-				boolean analysis =  (boolean) ((Map<?, ?>) next.get(reactantOrProduct)).get("flux");
+				Boolean analysis =  (Boolean) ((Map<?, ?>) next.get(reactantOrProduct)).get("flux");
 
 				Object[] res = new Object[5];
 
