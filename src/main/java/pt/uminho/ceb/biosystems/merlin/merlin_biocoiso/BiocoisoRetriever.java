@@ -88,14 +88,16 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 		this.objective=objective;
 	}
 
-	@Port(direction=Direction.INPUT, name="url",description="default BioISO url", advanced=true, defaultValue = "https://bioiso.bio.di.uminho.pt", order = 4)
-	public void setURL(String url) throws Exception{
-		this.url = url;
-	}
+//	@Port(direction=Direction.INPUT, name="url",description="default BioISO url", advanced=true, defaultValue = "https://bioiso.bio.di.uminho.pt", order = 4)
+//	public void setURL(String url) throws Exception{
+//		this.url = url;
+//	}
 
 	@Port(direction=Direction.INPUT, name="Backup",description="Backup model", order = 5)
 	public void setCommit(String commit) throws Exception {
 
+		this.url = FileUtils.readBioisoConfFile().get("host");
+		
 		this.commit = commit;
 
 		try {

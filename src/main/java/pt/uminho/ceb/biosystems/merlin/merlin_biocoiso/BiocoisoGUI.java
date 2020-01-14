@@ -59,7 +59,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	private ExtendedJComboBox<String> reaction ;
 	private ExtendedJComboBox<String> models ;
 	private ExtendedJComboBox<String> objective;
-	private JTextField url;
+//	private JTextField url;
 	private ParamsReceiver rec;
 
 	protected Object project;
@@ -94,7 +94,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		}
 		this.models = new ExtendedJComboBox<String>(workspaces);
 		this.objective = new ExtendedJComboBox<String>(new String[0]);
-		this.url = new JTextField("https://bioiso.bio.di.uminho.pt");
+//		this.url = new JTextField("https://bioiso.bio.di.uminho.pt");
 
 		this.reaction = new ExtendedJComboBox<String>(new String[0]);
 		this.reaction.setEditable(true);
@@ -146,7 +146,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 								new ParamSpec("Workspace", String.class,models.getSelectedItem().toString(),null),
 								new ParamSpec("Reaction", String.class,reaction.getSelectedItem().toString(),null),
 								new ParamSpec("Objective", String.class,objective.getSelectedItem().toString(),null),
-								new ParamSpec("url", String.class,url.getText(),null),
+//								new ParamSpec("url", String.class,url.getText(),null),
 								new ParamSpec("Commit", boolean.class,commit.getText(),null)
 
 						}
@@ -189,7 +189,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	}
 
 	private InputParameter[] getInputParameters() {
-		InputParameter[] parameters = new InputParameter[5];
+		InputParameter[] parameters = new InputParameter[4];
 		parameters[0] = 
 
 				new InputParameter(
@@ -210,14 +210,14 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 						objective, 
 						"Objective"
 						);
-		parameters[3] = 
-				new InputParameter(
-						"URL", 
-						url, 
-						"BioISO URL"
-						);
+//		parameters[3] = 
+//				new InputParameter(
+//						"URL", 
+//						url, 
+//						"BioISO URL"
+//						);
 		
-		parameters[4] = 
+		parameters[3] = 
 				new InputParameter(
 						"Commit", 
 						commit, 
