@@ -1,7 +1,6 @@
 package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.history;
 
 import java.awt.BorderLayout;
-import java.awt.Checkbox;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -18,12 +17,12 @@ import java.util.Arrays;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -41,7 +40,6 @@ import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceTableAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.utilities.AIBenchUtils;
-import pt.uminho.ceb.biosystems.merlin.gui.utilities.ButtonColumn;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.BiocoisoUtils;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
@@ -59,11 +57,17 @@ public class BiocoisoHistoryGUI extends JDialog{
 	private BiocoisoButtonColumn buttonColumnCompare;
 	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/notProducing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/producing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	private Map<String, Set<String>> actualModelData;
 
 
 	public BiocoisoHistoryGUI(WorkspaceAIB workspace) {
 		super(Workbench.getInstance().getMainFrame());
 		this.workspace = workspace;
+		try {
+			this.actualModelData = BiocoisoUtils.getGenesReactionsMetabolites(this.workspace);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		initGUI();
 		Utilities.centerOnOwner(this);
 		this.setIconImage((new ImageIcon(getClass().getClassLoader().getResource("icons/merlin.png"))).getImage());
@@ -110,6 +114,11 @@ public class BiocoisoHistoryGUI extends JDialog{
 			String[] dados = {"commit","compare models", "simulation", "select"};
 
 			File folder = new File(this.getWorkDirectory().concat("/biocoiso"));
+			
+			if (!folder.exists()) {
+				folder.mkdir();
+			}
+			
 			File[] biocoisoFilesList = folder.listFiles();
 			Object[][] dados2 = new Object[biocoisoFilesList.length][4];
 
@@ -151,7 +160,12 @@ public class BiocoisoHistoryGUI extends JDialog{
 
 				this.buttonColumnCompare = new BiocoisoButtonColumn(jTable,1, new ActionListener(){
 					public void actionPerformed(ActionEvent arg0){
-						processButtonCompare(arg0);
+						try {
+							processButtonCompare(arg0);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					} },
 						new MouseAdapter(){
 						public void mouseClicked(MouseEvent e) {
@@ -168,7 +182,12 @@ public class BiocoisoHistoryGUI extends JDialog{
 							// set the selected interval of rows. Using the "rowNumber"
 							// variable for the beginning and end selects only that one row.
 							model.setSelectionInterval( rowNumber, rowNumber );
-							processButtonCompare(e);
+							try {
+								processButtonCompare(e);
+							} catch (Exception e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
 						}
 
 
@@ -322,7 +341,7 @@ public class BiocoisoHistoryGUI extends JDialog{
 	}
 
 
-	protected void processButtonCompare(EventObject e) {
+	protected void processButtonCompare(EventObject e) throws Exception {
 		JButton button = null;
 		if(e.getClass()==ActionEvent.class)
 			button = (JButton)((ActionEvent) e).getSource();
@@ -332,10 +351,81 @@ public class BiocoisoHistoryGUI extends JDialog{
 
 		button.setSelected(true);
 
-		ListSelectionModel model = jTable.getSelectionModel();
-		model.setSelectionInterval( buttonColumnCommit.getSelectIndex(button), buttonColumnCommit.getSelectIndex(button));
+		ListSelectionModel model1 = jTable.getSelectionModel();
+		model1.setSelectionInterval( buttonColumnCompare.getSelectIndex(button), buttonColumnCompare.getSelectIndex(button));
+		
+		String database = this.workspace.getDatabase().getWorkspaceName();
 
+		Long taxonomyID= this.workspace.getTaxonomyID();
 
+		String path = FileUtils.getWorkspaceTaxonomyFolderPath(database, taxonomyID).concat("/biocoiso/");
+		
+		String modelPath = path.concat((String) jTable.getValueAt(jTable.getSelectedRow(),2)).concat("/model.xml");
+		
+		File model = new File(modelPath);
+		
+		Map<String, Set<String>> oldModel = BiocoisoUtils.getGenesReactionsMetabolitesFromModel(this.workspace, model);
+		
+		ArrayList<String> genesDeleted = new ArrayList<String>();
+		ArrayList<String> genesInserted = new ArrayList<String>();
+		
+		ArrayList<String> metabolitesDeleted = new ArrayList<String>();
+		ArrayList<String> metabolitesInserted = new ArrayList<String>();
+		
+		ArrayList<String> reactionsDeleted = new ArrayList<String>();
+		ArrayList<String> reactionsInserted = new ArrayList<String>();
+		
+		Set<String> actualGenes = this.actualModelData.get("genes");
+		Set<String> oldGenes = oldModel.get("genes");
+		
+		Set<String> actualMetabolites = this.actualModelData.get("metabolites");
+		Set<String> oldMetabolites = oldModel.get("metabolites");
+		
+		Set<String> actualReactions = this.actualModelData.get("reactions");
+		Set<String> oldReactions = oldModel.get("reactions");
+		
+		for (String gene : oldGenes ) {
+			
+			if (!actualGenes.contains(gene))
+				genesDeleted.add(gene);
+			
+		}
+		
+		for (String gene : actualGenes ) {
+			
+			if (!oldGenes.contains(gene))
+				genesInserted.add(gene);
+		}
+		
+		for (String metabolite : oldMetabolites ) {
+			
+			if (!actualMetabolites.contains(metabolite))
+				metabolitesDeleted.add(metabolite);
+			
+		}
+		
+		for (String metabolite : actualMetabolites ) {
+			
+			if (!oldGenes.contains(metabolite))
+				metabolitesInserted.add(metabolite);
+		}
+		
+		for (String reaction : oldReactions ) {
+			
+			if (!actualReactions.contains(reaction))
+				reactionsDeleted.add(reaction);
+			
+		}
+		
+		for (String reaction : actualReactions) {
+			
+			if (!oldReactions.contains(reaction))
+				reactionsInserted.add(reaction);
+		}
+		
+		System.out.println(genesDeleted);
+		System.out.println(reactionsDeleted);
+		
 	}
 
 	protected String getWorkDirectory() {

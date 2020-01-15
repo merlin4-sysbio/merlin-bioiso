@@ -11,34 +11,57 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.xml.stream.XMLStreamException;
 
+import org.apache.axis.utils.ArrayUtil;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.sbml.jsbml.SBMLReader;
 
 import es.uvigo.ei.aibench.workbench.Workbench;
 import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceAIB;
+import pt.uminho.ceb.biosystems.merlin.gui.utilities.AIBenchUtils;
+import pt.uminho.ceb.biosystems.merlin.processes.WorkspaceProcesses;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.ModelSources;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.MerlinSBML3Reader;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.MerlinSBMLContainer;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ModelImporter;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
+import pt.uminho.ceb.biosystems.merlin.core.containers.model.MetaboliteContainer;
+import pt.uminho.ceb.biosystems.merlin.core.containers.model.ReactionContainer;
+import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceData;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
+import pt.uminho.ceb.biosystems.merlin.entities.model.ModelReaction;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
+import pt.uminho.ceb.biosystems.merlin.services.model.ModelReactionsServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
+import pt.uminho.ceb.biosystems.mew.biocomponents.container.components.MetaboliteCI;
+import pt.uminho.ceb.biosystems.mew.biocomponents.container.components.StoichiometryValueCI;
+import pt.uminho.ceb.biosystems.mew.biocomponents.container.io.readers.JSBMLLevel3Reader;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 public class BiocoisoUtils {
-	
-	
-	
+
+
+
 	/**
 	 * This method generates a checksum key for the downloaded files 
 	 * @param digest
@@ -77,7 +100,7 @@ public class BiocoisoUtils {
 		//return complete hash
 		return sb.toString();
 	}
-	
+
 	/**
 	 * This method read a word in a file
 	 * @param path: {@code String} with the path for the file
@@ -110,16 +133,16 @@ public class BiocoisoUtils {
 
 		return null;
 	}
-	
+
 	public static void writeTextInFile(String message, File file) throws IOException {
-		
+
 		FileWriter writer = new FileWriter(file);
-		
+
 		writer.write(message);
-		
+
 		writer.close();
 	}
-	
+
 	public static File getLatestFilefromDir(String dirPath){
 		File dir = new File(dirPath);
 		File[] files = dir.listFiles();
@@ -136,6 +159,192 @@ public class BiocoisoUtils {
 		return lastModifiedFile;
 	}
 
+	public static List<File> getNLatestFilefromDir(String dirPath, int n){
+		File dir = new File(dirPath);
+		File[] files = dir.listFiles();
+		if (files == null || files.length == 0) {
+			return null;
+		}
+
+
+		ArrayList<File> orderedList = new ArrayList<>(Arrays.asList(files));
+
+
+		for (int i = 0; i < orderedList.size(); i++) {
+			File lastModifiedFile = orderedList.get(i);
+			for (int j=i+1; j<orderedList.size(); j++) {
+				if (lastModifiedFile.lastModified() < orderedList.get(j).lastModified()) {
+
+					lastModifiedFile = orderedList.get(j);
+					orderedList.set(j, orderedList.get(i));
+					orderedList.set(i, lastModifiedFile);
+
+				}
+
+			}
+
+		}
+		return orderedList.subList(0, n);
+	}
+
+	public static Map<String, Set<String>> getGenesReactionsMetabolites(WorkspaceAIB model) throws Exception{
+
+		Container container = new Container(new ContainerBuilder(model.getName(), "model_".concat(model.getName()),
+				ProjectServices.isCompartmentalisedModel(model.getName()), false, "", "e-biomass"));
+
+
+		//		ArrayList<String> reactions = new ArrayList<String>(Arrays.asList(getReactions(model)));
+
+		Set<String> reactions = container.getReactions().keySet();
+
+		Set<String> metabolites = container.getMetabolites().keySet();
+
+		Set<String> genes = container.getGenes().keySet();
+		
+		Set<String> genesModel = new HashSet<String>();
+		
+		for (String gene: genes) {
+			
+			gene = "G_".concat(gene);
+			genesModel.add(gene);
+			
+		}
+		
+		Map<String, Set<String>> res = new HashMap<>();
+		
+		res.put("reactions", reactions);
+
+		res.put("genes",genesModel);
+
+		res.put("metabolites", metabolites);
+
+		return res;
+
+
+	}
+
+	public static Map<String, Set<String>> getGenesReactionsMetabolitesFromModel(WorkspaceAIB database, File model) throws Exception{
+
+
+		JSBMLLevel3Reader reader = new JSBMLLevel3Reader(model.getAbsolutePath(),database.getName());
+		
+		Set<String> genes = reader.getGenes().keySet();
+		
+		Set<String> metabolites = reader.getMetabolites().keySet();
+		
+		Set<String> reactions = reader.getReactions().keySet();
+		
+		
+		Map<String, Set<String>> res = new HashMap<>();
+
+		res.put("reactions", reactions);
+
+		res.put("genes",genes);
+
+		res.put("metabolites", metabolites);
+		
+		return res;
+
+
+	}
+
+	public static String[] getReactions(WorkspaceAIB models) throws Exception {
+
+
+		WorkspaceAIB workspace = AIBenchUtils.getProject(models.toString());
+
+		Map<Integer, ReactionContainer> reactions_dic = ModelReactionsServices.getReactionsByReactionId(workspace.getName(), ProjectServices.isCompartmentalisedModel(workspace.getName()));
+
+		ArrayList<String> reactions_list = new ArrayList<String>();
+
+		Map<Integer, List<MetaboliteContainer>> reactionMetabolites = 
+				getStoichiometry(reactions_dic, 
+						ProjectServices.isCompartmentalisedModel(workspace.getName()),models.toString());
+
+		for (int res : reactions_dic.keySet()) {
+
+			if(reactionMetabolites.containsKey(res)) {
+
+				if (reactions_dic.get(res).getLocalisation()==null) 
+					reactions_list.add(buildID("R_",reactions_dic.get(res).getExternalIdentifier(),"cytop"));
+				else
+					reactions_list.add(buildID("R_",reactions_dic.get(res).getExternalIdentifier(),reactions_dic.get(res).getLocalisation().getAbbreviation()));
+
+
+			}
+
+		}
+
+
+		String[] reactions_list_arr =  reactions_list.toArray(new String[0]);
+
+		return reactions_list_arr;
+
+	}
+
+	private static Map<Integer, List<MetaboliteContainer>> getStoichiometry(Map<Integer, ReactionContainer> reactions, boolean isCompartmentalized, String models) throws Exception {
+
+		WorkspaceAIB workspace = AIBenchUtils.getProject(models);
+
+		Map<Integer, List<MetaboliteContainer>> reactionMetabolites = new HashMap<>();
+
+		List<String[]> result2 = ModelReactionsServices.getStoichiometryInfo(workspace.getName(), isCompartmentalized);
+		if(result2 != null) {
+
+			for(int i=0; i<result2.size(); i++) {
+
+				int idreaction = Integer.parseInt(result2.get(i)[1]);
+				int idMetabolite = Integer.parseInt(result2.get(i)[2]);
+				double stoichiometry = Double.parseDouble(result2.get(i)[3]);
+				String metaboliteName = result2.get(i)[4];
+				String formula = result2.get(i)[5];
+				String metaboliteExternalIdentifier = result2.get(i)[6];
+				String metaboliteCompartmentName = result2.get(i)[8];
+				int metaboliteIdCompartment = Integer.valueOf(result2.get(i)[9]);
+				String metaboliteCompartmentAbbreviation = result2.get(i)[10];
+
+				//				System.out.println(idreaction+" "+reactionName+" "+this.reactions.containsKey(idreaction));
+
+				if(reactions.containsKey(idreaction)) {
+
+					//					if(!list2[3].contains("m") && !list2[3].contains("n")) {
+
+					List<MetaboliteContainer> metabolitesContainer = new ArrayList<MetaboliteContainer>();
+
+					if(reactionMetabolites.containsKey(idreaction))
+						metabolitesContainer = reactionMetabolites.get(idreaction);
+
+					MetaboliteContainer metabolite = new MetaboliteContainer(idMetabolite, metaboliteName, formula, 
+							stoichiometry,metaboliteCompartmentName, metaboliteIdCompartment, metaboliteCompartmentAbbreviation, metaboliteExternalIdentifier);
+					metabolitesContainer.add(metabolite);
+
+					reactionMetabolites.put(idreaction, metabolitesContainer);
+				}
+			}
+			return reactionMetabolites;
+		}
+		return null;
+	}
+
+	private static String buildID(String prefix, String identifier, String compartment) {
+
+		if(compartment == null)
+			System.out.println("null compartment");
+
+		//		System.out.println(compartment);
+		//		System.out.println(identifier);
+		//		System.out.println(prefix);
+		//		
+		String output = identifier.concat("__").concat(compartment.toLowerCase());
+
+		if(!output.startsWith(prefix))
+			output = prefix.concat(output);
+
+		output = output.replace("-", "_").replace(":", "_").replace(" ", "_").replace("\t", "_").replace(".", "_").replace("+", "_");
+		return output;
+	}
+
+
 	public static void backupWorkspaceFolder(String directory, WorkspaceAIB project) throws IOException {
 
 		String path;
@@ -151,7 +360,7 @@ public class BiocoisoUtils {
 		org.apache.commons.io.FileUtils.copyDirectory(p, d);
 
 	}
-	
+
 	public static void zipBackupFiles(File directory, String pathOutputFile) throws IOException {
 
 
@@ -169,7 +378,7 @@ public class BiocoisoUtils {
 
 		org.apache.commons.io.FileUtils.deleteDirectory(directory);
 	}
-	
+
 	public static Map<?,?> readJSON(String file) {
 		JSONParser jsonParser = new JSONParser();
 
@@ -191,7 +400,7 @@ public class BiocoisoUtils {
 	}
 
 	public static void exportModel(WorkspaceAIB project, String folder) throws IOException, Exception {
-		
+
 		Container container = new Container(new ContainerBuilder(project.getName(), "model_".concat(project.getName()),
 				ProjectServices.isCompartmentalisedModel(project.getName()), false, "", "e-biomass"));
 
@@ -200,7 +409,7 @@ public class BiocoisoUtils {
 
 		merlinSBML3Writer.writeToFile();
 	}
-	
+
 	public static Pair<WorkspaceGenericDataTable, Map<?,?>> createDataTable(String file, List<String> columnsNames, String name, 
 			String windowName, Icon produced, Icon notProduced) throws IOException, ParseException {
 
@@ -254,20 +463,59 @@ public class BiocoisoUtils {
 		return null;
 	}
 
+
+	public static String getEmail() {
+
+		String confEmail = "";
+		ArrayList<String> listLines = new ArrayList<>();
+		String confPath = FileUtils.getConfFolderPath().concat("email.conf");
+		File configFile = new File(confPath);
+		try {
+			Scanner file = new Scanner(configFile);
+			while(file.hasNextLine()==true) {
+				listLines.add(file.nextLine());
+			}
+			file.close();	
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+
+		}
+
+		for (String item : listLines) {
+			if(item.startsWith("email")) {
+
+				String[]parts=item.split(":");
+				confEmail = parts[1].trim();
+			}
+		}
+
+		boolean verify = EmailValidator.getInstance().isValid(confEmail);
+
+
+		if (verify)
+			return confEmail;
+		else
+			return null;
+
+
+	}
+
+	//palsson.di.uminho.pt:7475
 	public static Object[] createLineFromMap(Map<?,?> keyMap, String key, Icon produced, Icon notProduced) {
 
 		Object[] res = new Object[5];
 
 		res[1]=key;
 
-		boolean flux = (boolean) keyMap.get("flux");
+
+		Boolean flux = (Boolean) keyMap.get("analysis");
 
 		@SuppressWarnings("unchecked")
-		ArrayList<ArrayList<String>> childrenList = (ArrayList<ArrayList<String>>) keyMap.get("children");
+		ArrayList<ArrayList<String>> childrenList = (ArrayList<ArrayList<String>>) keyMap.get("reactions");
 
 		res[2]= Integer.toString(childrenList.size());
 
-		res[3]=keyMap.get("side");
+		res[3]=keyMap.get("role");
 
 		if (flux) {
 			res[4] = produced;

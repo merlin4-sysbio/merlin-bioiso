@@ -94,7 +94,8 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		}
 		this.models = new ExtendedJComboBox<String>(workspaces);
 		this.objective = new ExtendedJComboBox<String>(new String[0]);
-		this.url = new JTextField("https://bioiso.bio.di.uminho.pt");
+		this.url = new JTextField("http://palsson.di.uminho.pt:7475");
+		System.out.println("CHANGE THIS URL");
 
 		this.reaction = new ExtendedJComboBox<String>(new String[0]);
 		this.reaction.setEditable(true);
@@ -274,9 +275,6 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 			}
 			
-//			Map<String, ReactionCI> dictionary = container.getReactions();
-
-//			Set<String> reactions_test = dictionary.keySet();
 
 			String[] reactions_list_arr =  reactions_list.toArray(new String[0]);
 			

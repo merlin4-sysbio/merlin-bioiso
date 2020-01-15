@@ -85,7 +85,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		String[] columnsNames = new String[] {"metabolite", "role"};
 		
 		
-		ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) next2.get("children"); //list with reactions
+		ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) next2.get("reactions"); //list with reactions
 
 		WorkspaceDataTable[] results = new WorkspaceDataTable[1];
 		
@@ -133,7 +133,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		Map<?,?> next2 = (Map<?, ?>) ((Map<?,?>) nextLevel.get(metabolite)).get("next");
 		
 
-		ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) ((Map<?,?>) nextLevel.get(metabolite)).get("children"); //list with reactions
+		ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) ((Map<?,?>) nextLevel.get(metabolite)).get("reactions"); //list with reactions
 
 		WorkspaceDataTable[] results = new WorkspaceDataTable[1];
 
@@ -192,9 +192,9 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 		if (!last) {
 			if (next.get(reactantOrProduct)!=null) {
-
-				ArrayList<ArrayList<String>> reactions = (ArrayList<ArrayList<String>>) ((Map<?, ?>) next.get(reactantOrProduct)).get("children");
-				boolean analysis =  (boolean) ((Map<?, ?>) next.get(reactantOrProduct)).get("flux");
+				
+				ArrayList<ArrayList<String>> reactions = (ArrayList<ArrayList<String>>) ((Map<?, ?>) next.get(reactantOrProduct)).get("reactions");
+				Boolean analysis =  (Boolean) ((Map<?, ?>) next.get(reactantOrProduct)).get("analysis");
 
 				Object[] res = new Object[5];
 
@@ -240,7 +240,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 	}
 
 
-	public Pair<WorkspaceDataTable[],Map<?,?>> getMetaboliteInfo(String metabolite, boolean refresh, Map<?,?> next) throws FileNotFoundException, IOException, ParseException {
+	public Pair<WorkspaceDataTable[],Map<?,?>> getMetaboliteInfo(String metabolite, Boolean refresh, Map<?,?> next) throws FileNotFoundException, IOException, ParseException {
 
 		refresh = true;
 
@@ -248,7 +248,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 		Map<?,?> nextToReturn = (Map<?, ?>) ((Map<?,?>) next.get(metabolite));
 		
-		ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) ((Map<?,?>) next.get(metabolite)).get("children"); //list with reactions
+		ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) ((Map<?,?>) next.get(metabolite)).get("reactions"); //list with reactions
 
 		WorkspaceDataTable[] results = new WorkspaceDataTable[1];
 
@@ -270,7 +270,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 				String reactionID =  (String) reaction.get(0); //r10856
 
-				boolean analysis = (boolean) reaction.get(1);
+				Boolean analysis = (Boolean) reaction.get(1);
 
 				ArrayList<String> reactantsList = (ArrayList<String>) reaction.get(2);
 
@@ -300,7 +300,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		return super.getRowInfo();
 	}
 
-	private Object[] createLineFromMap(boolean analysis, String reactionID, ArrayList<String> reactantsList, ArrayList<String> productsList) {
+	private Object[] createLineFromMap(Boolean analysis, String reactionID, ArrayList<String> reactantsList, ArrayList<String> productsList) {
 		Object[] res = new Object[5];
 
 		res[1]=reactionID;
