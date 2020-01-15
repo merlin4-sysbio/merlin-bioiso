@@ -1,6 +1,5 @@
 package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
 
-import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,10 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,45 +17,30 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.xml.stream.XMLStreamException;
 
-import org.apache.axis.utils.ArrayUtil;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.sbml.jsbml.SBMLReader;
 
 import es.uvigo.ei.aibench.workbench.Workbench;
 import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.utilities.AIBenchUtils;
-import pt.uminho.ceb.biosystems.merlin.processes.WorkspaceProcesses;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.ModelSources;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.Enumerators.SBMLLevelVersion;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ContainerBuilder;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.MerlinSBML3Reader;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.MerlinSBMLContainer;
-import pt.uminho.ceb.biosystems.merlin.biocomponents.io.readers.ModelImporter;
 import pt.uminho.ceb.biosystems.merlin.biocomponents.io.writers.SBMLLevel3Writer;
 import pt.uminho.ceb.biosystems.merlin.core.containers.model.MetaboliteContainer;
 import pt.uminho.ceb.biosystems.merlin.core.containers.model.ReactionContainer;
-import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceData;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
-import pt.uminho.ceb.biosystems.merlin.entities.model.ModelReaction;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelReactionsServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
-import pt.uminho.ceb.biosystems.mew.biocomponents.container.components.MetaboliteCI;
-import pt.uminho.ceb.biosystems.mew.biocomponents.container.components.StoichiometryValueCI;
 import pt.uminho.ceb.biosystems.mew.biocomponents.container.io.readers.JSBMLLevel3Reader;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 public class BiocoisoUtils {
-
 
 
 	/**
