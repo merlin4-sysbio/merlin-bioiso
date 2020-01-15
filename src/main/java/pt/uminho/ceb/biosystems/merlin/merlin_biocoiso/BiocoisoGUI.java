@@ -94,7 +94,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		}
 		this.models = new ExtendedJComboBox<String>(workspaces);
 		this.objective = new ExtendedJComboBox<String>(new String[0]);
-		this.url = new JTextField("http://palsson.di.uminho.pt:7475");
+		this.url = new JTextField("http://bioiso.bio.di.uminho.pt");
 		System.out.println("CHANGE THIS URL");
 
 		this.reaction = new ExtendedJComboBox<String>(new String[0]);
