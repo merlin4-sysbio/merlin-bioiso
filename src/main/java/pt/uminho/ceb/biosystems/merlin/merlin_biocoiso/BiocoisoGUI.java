@@ -17,11 +17,9 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
@@ -59,7 +57,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	private ExtendedJComboBox<String> reaction ;
 	private ExtendedJComboBox<String> models ;
 	private ExtendedJComboBox<String> objective;
-	private JTextField url;
+//	private JTextField url;
 	private ParamsReceiver rec;
 
 	protected Object project;
@@ -94,8 +92,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		}
 		this.models = new ExtendedJComboBox<String>(workspaces);
 		this.objective = new ExtendedJComboBox<String>(new String[0]);
-		this.url = new JTextField("http://bioiso.bio.di.uminho.pt");
-		System.out.println("CHANGE THIS URL");
+//		this.url = new JTextField("https://bioiso.bio.di.uminho.pt");
 
 		this.reaction = new ExtendedJComboBox<String>(new String[0]);
 		this.reaction.setEditable(true);
@@ -147,7 +144,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 								new ParamSpec("Workspace", String.class,models.getSelectedItem().toString(),null),
 								new ParamSpec("Reaction", String.class,reaction.getSelectedItem().toString(),null),
 								new ParamSpec("Objective", String.class,objective.getSelectedItem().toString(),null),
-								new ParamSpec("url", String.class,url.getText(),null),
+//								new ParamSpec("url", String.class,url.getText(),null),
 								new ParamSpec("Commit", boolean.class,commit.getText(),null)
 
 						}
@@ -190,7 +187,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	}
 
 	private InputParameter[] getInputParameters() {
-		InputParameter[] parameters = new InputParameter[5];
+		InputParameter[] parameters = new InputParameter[4];
 		parameters[0] = 
 
 				new InputParameter(
@@ -211,14 +208,14 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 						objective, 
 						"Objective"
 						);
-		parameters[3] = 
-				new InputParameter(
-						"URL", 
-						url, 
-						"BioISO URL"
-						);
+//		parameters[3] = 
+//				new InputParameter(
+//						"URL", 
+//						url, 
+//						"BioISO URL"
+//						);
 		
-		parameters[4] = 
+		parameters[3] = 
 				new InputParameter(
 						"Commit", 
 						commit, 
@@ -275,6 +272,9 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 			}
 			
+//			Map<String, ReactionCI> dictionary = container.getReactions();
+
+//			Set<String> reactions_test = dictionary.keySet();
 
 			String[] reactions_list_arr =  reactions_list.toArray(new String[0]);
 			
