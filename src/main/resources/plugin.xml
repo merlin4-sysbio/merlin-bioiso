@@ -23,11 +23,11 @@
 		</extension>
 		<extension uid="aibench.core"
 			name="aibench.core.operation-definition"
-			class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.BiocoisoHistory">
+			class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.history.BiocoisoHistory">
 			<operation-description name="BioISO simulation history"
-				path="40@validation/30@BioISO" uid="operations.BioISOHistory.ID" />
-		</extension>
-
+				path="40@validation/30@BioISO" uid="operations.BioISOHistory.ID"
+				icon="icons/Lifecycle/remote.png" />
+		</extension> 
 		<extension uid="aibench.workbench"
 			name="aibench.workbench.view">
 			<icon-operation operation="operations.BioISOImporter.ID"
@@ -56,7 +56,7 @@
 				<!-- class="pt.uminho.ceb.biosystems.merlin.aibench.views.WorkspaceGenericEntityDataView" /> -->
 		</extension>
 		<extension uid="aibench.workbench"
-			name="aibench.workbench.view">
+			name="aibench.workbench.view"  >
 			<menu-icon menu="validation/BioISO" icon="icons/Lifecycle/remote.png" />
 		</extension>
 			

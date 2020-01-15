@@ -106,7 +106,7 @@ public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
 			{
 				jButton1ExportTxt = new JButton();
 				jPanel4.add(jButton1ExportTxt, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-				jButton1ExportTxt.setToolTipText("export to text file (json)");
+				jButton1ExportTxt.setToolTipText("export to file (json)");
 				jButton1ExportTxt.setText("export file");
 				jButton1ExportTxt.setIcon(new CreateImageIcon(new ImageIcon((getClass().getClassLoader().getResource("icons/Download.png"))),0.1).resizeImageIcon());
 				jButton1ExportTxt.setBounds(532, 72, 174, 38);

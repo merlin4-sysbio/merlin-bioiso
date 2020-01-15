@@ -37,7 +37,9 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 	
 	private String url;
 
-	public HandlingRequestsAndRetrievalsBiocoiso(File model, String reaction, String objective, String url){
+	private String email;
+
+	public HandlingRequestsAndRetrievalsBiocoiso(File model, String reaction, String objective, String url, String email){
 
 		this.setModel(model);
 		
@@ -46,6 +48,8 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 		this.objective=objective;
 		
 		this.url = url;
+		
+		this.email = email;
 		
 
 	}
@@ -59,7 +63,8 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 	 */
 	public String postFiles() throws IOException, InterruptedException {
 
-		String uploadUrl = this.url.concat("/submitMerlinPlugin/"+reaction+"/"+objective);
+		String uploadUrl = this.url.concat("/submitMerlinPlugin/"+reaction+"/"+objective+"/"+this.email);
+		
 
 		String charset = "UTF-8";
 		String param = "value";
@@ -154,10 +159,10 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 	 */
 	public int getStatus(String submissionID) throws IOException {
 
-		String uploadUrl = this.url.concat("/status");
+		String uploadUrl = this.url.concat("/result");
 
-		uploadUrl = uploadUrl.concat("/"+submissionID+"/True");
-
+		uploadUrl = uploadUrl.concat("/"+this.email+"/"+submissionID+"/True"); 
+		
 		URL url = new URL(uploadUrl);
 
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
@@ -188,8 +193,8 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 		try {
 			String uploadUrl = this.url.concat("/download");
 
-			uploadUrl = uploadUrl.concat("/"+submissionID);
-
+			uploadUrl = uploadUrl.concat("/"+this.email+"/"+ submissionID); 
+			
 			URL downloadUrl = new URL(uploadUrl);
 
 			HttpURLConnection conn = (HttpURLConnection)downloadUrl.openConnection();

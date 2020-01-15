@@ -40,6 +40,7 @@ import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceTableAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.jpanels.CustomGUI;
 import pt.uminho.ceb.biosystems.merlin.gui.utilities.AIBenchUtils;
+import pt.uminho.ceb.biosystems.merlin.gui.utilities.MerlinUtils;
 import pt.uminho.ceb.biosystems.merlin.gui.utilities.TimeLeftProgress;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.SequenceType;
@@ -74,6 +75,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 	private String url;
 	private boolean backup;
 	private String commit;
+	private String email;
 
 
 
@@ -95,16 +97,14 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 
 	@Port(direction=Direction.INPUT, name="Backup",description="Backup model", order = 5)
 	public void setCommit(String commit) throws Exception {
-
+		
 		this.url = FileUtils.readBioisoConfFile().get("host");
 		
 		this.commit = commit;
 
 		try {
-
-
+			
 			this.startTime = GregorianCalendar.getInstance().getTimeInMillis();
-
 
 			boolean submitted = submitFiles();
 
@@ -162,9 +162,6 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 				BiocoisoUtils.createDataTable(results_file.getAbsolutePath().concat("/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
 						Arrays.asList(columnsName), this.project.getName(), name,produced,notProduced);
 
-		//		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
-		//				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso_2.json", 
-		//						Arrays.asList(columnsName), this.project.getName(), name);
 
 		Map<?, ?> entireMap = BiocoisoUtils.readJSON(results_file.getAbsolutePath().concat("/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"));
 
@@ -248,8 +245,11 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 		if (model == null) {
 			return false;
 		}
+		
+		this.email = BiocoisoUtils.getEmail();
+		
 
-		HandlingRequestsAndRetrievalsBiocoiso post = new HandlingRequestsAndRetrievalsBiocoiso(model, this.reaction, this.objective, this.url);
+		HandlingRequestsAndRetrievalsBiocoiso post = new HandlingRequestsAndRetrievalsBiocoiso(model, this.reaction, this.objective, this.url, this.email);
 
 		String submissionID = "";
 
@@ -440,7 +440,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 		String date = "_" + currentTime.getHour() + "h" + currentTime.getMinute() + "m" + currentTime.getSecond() + "s"
 				+ currentTime.getDayOfMonth() + currentTime.getMonthValue() + currentTime.getYear();
 
-		String newFileBiocoiso = biocoisoFolder.getAbsolutePath().concat("/biocoiso"+date);
+		String newFileBiocoiso = biocoisoFolder.getAbsolutePath().concat("/"+this.reaction+date);
 		
 		FileUtils.createFoldersFromPath(newFileBiocoiso);
 		
@@ -543,6 +543,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 	//		// TODO Auto-generated method stub
 	//		
 	//	}
+	
 
 }
 
