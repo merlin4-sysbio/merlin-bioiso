@@ -124,7 +124,7 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 			while ((html = in.readLine()) != null){
 				if (html.contains("submissionID")) {
 					String[] parts = html.split(":");
-					docker = parts[1].replace("\"", "").trim();
+					docker = parts[4].replace("\"", "").trim().replace("}", "");
 				}
 			}
 		}
