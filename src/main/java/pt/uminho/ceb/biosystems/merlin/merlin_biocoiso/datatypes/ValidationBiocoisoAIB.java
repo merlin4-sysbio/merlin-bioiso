@@ -326,5 +326,9 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 	public void setNextLevel(Map<?, ?> nextLevel) {
 		this.nextLevel = nextLevel;
 	}
+	
+	public void remove() {
+		
+	}
 
 }

@@ -78,7 +78,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	}
 
 	public String getDescription() {
-		return "Get results from BioISO";
+		return "get results from BioISO";
 	}
 
 	public JPanel getInputComponentsPane() {
@@ -141,11 +141,11 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 				rec.paramsIntroduced(
 						new ParamSpec[]{
-								new ParamSpec("Workspace", String.class,models.getSelectedItem().toString(),null),
-								new ParamSpec("Reaction", String.class,reaction.getSelectedItem().toString(),null),
-								new ParamSpec("Objective", String.class,objective.getSelectedItem().toString(),null),
+								new ParamSpec("workspace", String.class,models.getSelectedItem().toString(),null),
+								new ParamSpec("reaction", String.class,reaction.getSelectedItem().toString(),null),
+								new ParamSpec("objective", String.class,objective.getSelectedItem().toString(),null),
 //								new ParamSpec("url", String.class,url.getText(),null),
-								new ParamSpec("Commit", boolean.class,commit.getText(),null)
+								new ParamSpec("commit", boolean.class,commit.getText(),null)
 
 						}
 						);
@@ -191,22 +191,22 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		parameters[0] = 
 
 				new InputParameter(
-						"Workspace", 
+						"workspace", 
 						models, 
-						"Select the workspace"
+						"select the workspace"
 						);
 
 		parameters[1] = 
 				new InputParameter(
-						"Reaction", 
+						"reaction", 
 						reaction, 
-						"Reaction to be studied"
+						"reaction to be studied"
 						);
 		parameters[2] = 
 				new InputParameter(
-						"Objective", 
+						"objective", 
 						objective, 
-						"Objective"
+						"objective"
 						);
 //		parameters[3] = 
 //				new InputParameter(
@@ -217,9 +217,9 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		
 		parameters[3] = 
 				new InputParameter(
-						"Commit", 
+						"commit", 
 						commit, 
-						"Commit"
+						"commit"
 						);
 		
 		return parameters;

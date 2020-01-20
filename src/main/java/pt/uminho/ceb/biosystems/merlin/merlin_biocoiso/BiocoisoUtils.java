@@ -115,6 +115,31 @@ public class BiocoisoUtils {
 		return null;
 	}
 
+	public static String readWordsInFile(String path){
+
+		try {
+
+			BufferedReader reader = new BufferedReader(new FileReader(path));
+
+			String text = "";
+			String line;
+			while ((line = reader.readLine()) != null) {
+
+				if(!line.isEmpty()) {
+					text= text + line + "\n";
+				}
+			}
+
+			reader.close();
+			return text;
+		} 
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
 	public static void writeTextInFile(String message, File file) throws IOException {
 
 		FileWriter writer = new FileWriter(file);

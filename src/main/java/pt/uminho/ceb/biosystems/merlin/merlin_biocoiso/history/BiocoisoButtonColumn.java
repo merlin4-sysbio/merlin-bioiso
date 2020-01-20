@@ -1,6 +1,7 @@
 package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.history;
 
 import java.awt.Component;
+import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.io.Serializable;
@@ -19,7 +20,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import pt.uminho.ceb.biosystems.merlin.gui.utilities.CreateImageIcon;
 
 public class BiocoisoButtonColumn implements Serializable{
 	
@@ -27,8 +27,8 @@ public class BiocoisoButtonColumn implements Serializable{
 	private EventListener eventListener;
 	private Map<Integer, JButton> valueArray;
 	private MouseListener mouseListener;
-	private List<Integer> interProRow;
 	private String icon;
+
 
 
 	/**
@@ -52,7 +52,6 @@ public class BiocoisoButtonColumn implements Serializable{
 		TableColumn dataColumn = columnModel.getColumn(column);
 		valueArray = new TreeMap<Integer,JButton>();
 		this.build(dataColumn);
-		this.interProRow = interProRow;
 	}
 	
 
@@ -102,10 +101,10 @@ public class BiocoisoButtonColumn implements Serializable{
 	private JButton createButton(int row) {
 		
 		JButton button = new JButton();
-		if(this.interProRow.contains(row))
-			button.setIcon(new CreateImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Search_IP.png")),0.06).resizeImageIcon());
+		if (this.icon.equals("model"))
+			button.setIcon(new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/cell.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT)));
 		else
-			button.setIcon(new CreateImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/Search.png")),0.06).resizeImageIcon());
+			button.setIcon(new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/message.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT)));
 		//button.setBackground(Color.WHITE);
 		addListenerToButton(button);
 		addMouseListenerToButton(button);

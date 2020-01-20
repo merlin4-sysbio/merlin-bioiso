@@ -2,18 +2,24 @@ package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.history;
 
 import java.util.ArrayList;
 
-import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
 
 public class BiocoisoDefaultTableModel extends AbstractTableModel
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5564113738356671611L;
+	/**
+	 * 
+	 */
 	private final String[] columnNames = new String[] {
-			"commit","compare models", "simulation", "select"
+			"commit","compare models", "reaction", "day", "hour", "select"
 	};
 	private final Class[] columnClass = new Class[] {
-			String.class, String.class,String.class,Boolean.class
+			String.class, String.class,String.class,String.class,String.class,Boolean.class
 	};
 	private Object[][] historyList;
 
@@ -44,31 +50,13 @@ public class BiocoisoDefaultTableModel extends AbstractTableModel
 
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 
-		if (columnIndex==1 || columnIndex==0 || columnIndex==3)
+		if (columnIndex==1 || columnIndex==0 || columnIndex==5)
 			return true;
 
 		return false;
 	}
 
 
-	//	@Override
-	//	public Object getValueAt(int rowIndex, int columnIndex)
-	//	{
-	//		Object row = historyList.get(rowIndex);
-	//		if(0 == columnIndex) {
-	//			return row;
-	//		}
-	//		else if(1 == columnIndex) {
-	//			return row;
-	//		}
-	//		else if(2 == columnIndex) {
-	//			return row;
-	//		}
-	//		else if(3 == columnIndex) {
-	//			return row;
-	//		}
-	//		return null;
-	//	}
 
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {

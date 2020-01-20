@@ -73,7 +73,6 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/producing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	private String objective;
 	private String url;
-	private boolean backup;
 	private String commit;
 	private String email;
 
@@ -437,8 +436,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 
 		LocalDateTime currentTime = LocalDateTime.now();
 
-		String date = "_" + currentTime.getHour() + "h" + currentTime.getMinute() + "m" + currentTime.getSecond() + "s"
-				+ currentTime.getDayOfMonth() + currentTime.getMonthValue() + currentTime.getYear();
+		String date = "." + currentTime.getDayOfMonth() + "-" +currentTime.getMonthValue() + "-" + currentTime.getYear()+ "." + currentTime.getHour() + "h" + currentTime.getMinute() + "m" + currentTime.getSecond() + "s";
 
 		String newFileBiocoiso = biocoisoFolder.getAbsolutePath().concat("/"+this.reaction+date);
 		

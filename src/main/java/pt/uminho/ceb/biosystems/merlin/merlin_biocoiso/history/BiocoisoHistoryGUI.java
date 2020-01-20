@@ -29,6 +29,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import org.json.simple.parser.ParseException;
 
@@ -36,10 +38,12 @@ import es.uvigo.ei.aibench.core.Core;
 import es.uvigo.ei.aibench.core.clipboard.ClipboardItem;
 import es.uvigo.ei.aibench.workbench.Workbench;
 import es.uvigo.ei.aibench.workbench.utilities.Utilities;
+import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceTableAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.utilities.AIBenchUtils;
+import pt.uminho.ceb.biosystems.merlin.gui.views.windows.GenericDetailWindow;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.BiocoisoUtils;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
@@ -111,28 +115,39 @@ public class BiocoisoHistoryGUI extends JDialog{
 			BorderLayout jPanel2Layout = new BorderLayout();
 			jPanel2.setLayout(jPanel2Layout);
 
-			String[] dados = {"commit","compare models", "simulation", "select"};
 
 			File folder = new File(this.getWorkDirectory().concat("/biocoiso"));
-			
+
 			if (!folder.exists()) {
 				folder.mkdir();
 			}
-			
+
 			File[] biocoisoFilesList = folder.listFiles();
-			Object[][] dados2 = new Object[biocoisoFilesList.length][4];
+			Object[][] dados2 = new Object[biocoisoFilesList.length][6];
+
+			//			"commit","compare models", "reaction", "hour", "day", "select"
 
 			for (int i = 0; i<biocoisoFilesList.length;i++) {
 
-				dados2[i][2] = biocoisoFilesList[i].getName();
-				dados2[i][3] = false;
+				String[] reactionHourDay = biocoisoFilesList[i].getName().split("\\.");
+
+
+				dados2[i][2] = reactionHourDay[0];
+
+				dados2[i][3] = reactionHourDay[1];
+
+				dados2[i][4] = reactionHourDay[2];
+
+				dados2[i][5] = false;
 
 			}
-
 			{
 				this.jTable = new JTable();
 
 				this.jTable.setModel(new BiocoisoDefaultTableModel(dados2));
+				
+				TableRowSorter<TableModel> sorter = new TableRowSorter<TableModel>(jTable.getModel());
+				jTable.setRowSorter(sorter);
 
 				this.buttonColumnCommit = new BiocoisoButtonColumn(jTable,0, new ActionListener(){
 					public void actionPerformed(ActionEvent arg0){
@@ -191,7 +206,7 @@ public class BiocoisoHistoryGUI extends JDialog{
 						}
 
 
-					}, new ArrayList<>(),"compare");
+					}, new ArrayList<>(),"model");
 
 
 				jTable.getTableHeader().setReorderingAllowed(false);
@@ -200,11 +215,13 @@ public class BiocoisoHistoryGUI extends JDialog{
 				// horizontal scroll bar.
 
 				jTable.getColumnModel().getColumn(0).setPreferredWidth(5);
-				jTable.getColumnModel().getColumn(1).setPreferredWidth(5);
-				jTable.getColumnModel().getColumn(2).setPreferredWidth(100);
+				jTable.getColumnModel().getColumn(1).setPreferredWidth(40);
+				jTable.getColumnModel().getColumn(2).setPreferredWidth(50);
 				jTable.getColumnModel().getColumn(3).setPreferredWidth(5);
+				jTable.getColumnModel().getColumn(4).setPreferredWidth(5);
+				jTable.getColumnModel().getColumn(5).setPreferredWidth(5);
 
-				//				jTable.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
+//				jTable.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
 
 
 				JScrollPane pane = new JScrollPane(jTable);
@@ -229,11 +246,11 @@ public class BiocoisoHistoryGUI extends JDialog{
 
 						for(int i=0;i<jTable.getRowCount();i++)
 						{
-							Boolean checked=Boolean.valueOf(jTable.getValueAt(i, 3).toString());
+							Boolean checked=Boolean.valueOf(jTable.getValueAt(i, 5).toString());
 
 							if (checked) {
 								indexes.add(i);
-								String fileName = (String) jTable.getValueAt(i, 2);
+								String fileName = (String) jTable.getValueAt(i, 2) + "." + jTable.getValueAt(i, 3) + "." + jTable.getValueAt(i, 4);
 								File folder = new File(getWorkDirectory().concat("/biocoiso/").concat(fileName));
 								try {
 									FileUtils.deleteDirectory(folder);
@@ -259,14 +276,15 @@ public class BiocoisoHistoryGUI extends JDialog{
 
 						for(int i=0;i<jTable.getRowCount();i++)
 						{
-							Boolean checked=Boolean.valueOf(jTable.getValueAt(i, 3).toString());
+							Boolean checked=Boolean.valueOf(jTable.getValueAt(i, 5).toString());
 
 							if (checked) {
 
-								String fileName = (String) jTable.getValueAt(i, 2);
+								String fileName = (String) jTable.getValueAt(i, 2) + "." + jTable.getValueAt(i, 3) + "." + jTable.getValueAt(i, 4);
 
 								File file = new File(getWorkDirectory().concat("/biocoiso/").concat(fileName).concat("/results/results_biocoiso.json"));
-
+								
+								System.out.println(file);
 								int table_number = getProject().getDatabase().getValidation().getEntities().size() + 1;
 
 								String name = Integer.toString(table_number) + " - " + fileName;
@@ -336,7 +354,7 @@ public class BiocoisoHistoryGUI extends JDialog{
 
 		}
 
-		this.setSize(600, 600);
+		this.setSize(620, 600);
 
 	}
 
@@ -353,79 +371,152 @@ public class BiocoisoHistoryGUI extends JDialog{
 
 		ListSelectionModel model1 = jTable.getSelectionModel();
 		model1.setSelectionInterval( buttonColumnCompare.getSelectIndex(button), buttonColumnCompare.getSelectIndex(button));
-		
+
 		String database = this.workspace.getDatabase().getWorkspaceName();
 
 		Long taxonomyID= this.workspace.getTaxonomyID();
 
+		int i = jTable.getSelectedRow();
+
 		String path = FileUtils.getWorkspaceTaxonomyFolderPath(database, taxonomyID).concat("/biocoiso/");
-		
-		String modelPath = path.concat((String) jTable.getValueAt(jTable.getSelectedRow(),2)).concat("/model.xml");
-		
+
+		String fileName = (String) jTable.getValueAt(i, 2) + "." + jTable.getValueAt(i, 3) + "." + jTable.getValueAt(i, 4);
+
+		String modelPath = path.concat(fileName.concat("/model.xml"));
+
 		File model = new File(modelPath);
-		
+
 		Map<String, Set<String>> oldModel = BiocoisoUtils.getGenesReactionsMetabolitesFromModel(this.workspace, model);
-		
+
 		ArrayList<String> genesDeleted = new ArrayList<String>();
 		ArrayList<String> genesInserted = new ArrayList<String>();
-		
+
 		ArrayList<String> metabolitesDeleted = new ArrayList<String>();
 		ArrayList<String> metabolitesInserted = new ArrayList<String>();
-		
+
 		ArrayList<String> reactionsDeleted = new ArrayList<String>();
 		ArrayList<String> reactionsInserted = new ArrayList<String>();
-		
+
 		Set<String> actualGenes = this.actualModelData.get("genes");
 		Set<String> oldGenes = oldModel.get("genes");
-		
+
 		Set<String> actualMetabolites = this.actualModelData.get("metabolites");
 		Set<String> oldMetabolites = oldModel.get("metabolites");
-		
+
 		Set<String> actualReactions = this.actualModelData.get("reactions");
 		Set<String> oldReactions = oldModel.get("reactions");
-		
+
 		for (String gene : oldGenes ) {
-			
+
 			if (!actualGenes.contains(gene))
 				genesDeleted.add(gene);
-			
+
 		}
-		
+
 		for (String gene : actualGenes ) {
-			
+
 			if (!oldGenes.contains(gene))
 				genesInserted.add(gene);
 		}
-		
+
 		for (String metabolite : oldMetabolites ) {
-			
+
 			if (!actualMetabolites.contains(metabolite))
 				metabolitesDeleted.add(metabolite);
-			
+
 		}
-		
+
 		for (String metabolite : actualMetabolites ) {
-			
-			if (!oldGenes.contains(metabolite))
+
+			if (!oldMetabolites.contains(metabolite))
 				metabolitesInserted.add(metabolite);
 		}
-		
+
 		for (String reaction : oldReactions ) {
-			
+
 			if (!actualReactions.contains(reaction))
 				reactionsDeleted.add(reaction);
-			
+
 		}
-		
+
 		for (String reaction : actualReactions) {
-			
+
 			if (!oldReactions.contains(reaction))
 				reactionsInserted.add(reaction);
+
 		}
-		
-		System.out.println(genesDeleted);
-		System.out.println(reactionsDeleted);
-		
+
+
+		WorkspaceDataTable[] results = new WorkspaceDataTable[3];
+
+		String[] columnsNames = new String[] {"inserted","deleted"};
+
+
+
+		i = 0;
+
+		results[0] = new WorkspaceDataTable(columnsNames, "genes");
+		while (i<genesDeleted.size() || i<genesInserted.size()) {
+			String[] genes = new String[2]; 
+			if (i>=genesDeleted.size()) {
+				genes[1] = "";
+				genes[0] = genesInserted.get(i);
+			}
+			else if (i>=genesInserted.size()) {
+				genes[0] = "";
+				genes[1] = genesDeleted.get(i);
+			}
+			else {
+				genes[0] = genesInserted.get(i);
+				genes[1] = genesDeleted.get(i);
+			}
+			results[0].addLine(genes);
+			i++;
+		}
+
+		i=0;
+		results[1] = new WorkspaceDataTable(columnsNames, "metabolites");
+		while (i<metabolitesDeleted.size() || i<metabolitesInserted.size()) {
+			String[] metabolites = new String[2]; 
+			if (i>=metabolitesDeleted.size()) {
+				metabolites[1] = "";
+				metabolites[0] = metabolitesInserted.get(i);
+			}
+			else if (i>=metabolitesInserted.size()) {
+				metabolites[0] = "";
+				metabolites[1] = metabolitesDeleted.get(i);
+			}
+			else {
+				metabolites[0] = metabolitesInserted.get(i);
+				metabolites[1] = metabolitesDeleted.get(i);
+			}
+			results[1].addLine(metabolites);
+			i++;
+		}
+
+		i=0;
+		results[2] = new WorkspaceDataTable(columnsNames, "reactions");
+		while (i<reactionsDeleted.size() || i<reactionsInserted.size()) {
+			String[] reactions = new String[2]; 
+			if (i>=reactionsDeleted.size()) {
+				reactions[1] = "";
+				reactions[0] = reactionsInserted.get(i);
+			}
+			else if (i>=reactionsInserted.size()) {
+				reactions[0] = "";
+				reactions[1] = reactionsDeleted.get(i);
+			}
+			else {
+				reactions[0] = reactionsInserted.get(i);
+				reactions[1] = reactionsDeleted.get(i);
+			}
+			results[2].addLine(reactions);
+			i++;
+		}
+
+		new GenericDetailWindow(results, "", "");
+
+
 	}
 
 	protected String getWorkDirectory() {
@@ -455,12 +546,23 @@ public class BiocoisoHistoryGUI extends JDialog{
 		ListSelectionModel model = jTable.getSelectionModel();
 		model.setSelectionInterval( buttonColumnCommit.getSelectIndex(button), buttonColumnCommit.getSelectIndex(button));
 
+		int i = jTable.getSelectedRow();
+		
+		String path = getWorkDirectory().concat("/biocoiso/");
+		
+		String fileName = (String) jTable.getValueAt(i, 2) + "." + jTable.getValueAt(i, 3) + "." + jTable.getValueAt(i, 4);
 
+		String commitPath = path.concat(fileName.concat("/commit.txt"));
+
+		String message = BiocoisoUtils.readWordsInFile(commitPath);
+
+		Workbench.getInstance().info(message);
 	}
 
 	public WorkspaceAIB getProject() {
 		return this.workspace;
 	}
+
 }
 
 
