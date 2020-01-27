@@ -24,6 +24,12 @@ import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
+
+/** Bioiso Results importer
+ * @author João Capela
+ *
+ */
+
 @Operation(name="BioISO",description="Import results")
 public class BiocoisoResultsImporter {
 	

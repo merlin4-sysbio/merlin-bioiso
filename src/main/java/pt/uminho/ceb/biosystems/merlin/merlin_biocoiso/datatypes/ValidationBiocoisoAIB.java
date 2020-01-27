@@ -21,6 +21,12 @@ import pt.uminho.ceb.biosystems.merlin.gui.datatypes.interfaces.IEntityAIB;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoiso;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
+
+/*
+ * @author João Capela
+ *
+ */
+
 @Datatype(structure= Structure.SIMPLE, namingMethod="getName",removable=true,removeMethod ="remove")
 public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntityAIB{
 

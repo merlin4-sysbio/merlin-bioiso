@@ -34,6 +34,10 @@ import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
+/*
+ * @author João Capela
+ *
+ */
 public class BiocoisoDetailWindow extends javax.swing.JDialog{
 
 	/**

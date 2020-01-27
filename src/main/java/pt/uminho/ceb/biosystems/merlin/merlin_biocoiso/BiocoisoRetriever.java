@@ -40,7 +40,6 @@ import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceTableAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.jpanels.CustomGUI;
 import pt.uminho.ceb.biosystems.merlin.gui.utilities.AIBenchUtils;
-import pt.uminho.ceb.biosystems.merlin.gui.utilities.MerlinUtils;
 import pt.uminho.ceb.biosystems.merlin.gui.utilities.TimeLeftProgress;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.SequenceType;
@@ -49,6 +48,7 @@ import pt.uminho.ceb.biosystems.merlin.processes.WorkspaceProcesses;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelSequenceServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
+
 
 
 /**Aibench operation for BioISO

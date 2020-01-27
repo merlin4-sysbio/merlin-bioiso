@@ -36,9 +36,15 @@ import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelReactionsServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
-import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.container.Container;
 import pt.uminho.ceb.biosystems.mew.biocomponents.container.io.readers.JSBMLLevel3Reader;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
+
+
+/*
+ * @author João Capela
+ *
+ */
 
 public class BiocoisoUtils {
 

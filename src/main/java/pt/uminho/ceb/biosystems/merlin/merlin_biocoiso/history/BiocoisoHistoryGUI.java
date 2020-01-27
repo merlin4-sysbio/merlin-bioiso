@@ -49,6 +49,11 @@ import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBioco
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
+
+/*
+ * @author João Capela
+ *
+ */
 public class BiocoisoHistoryGUI extends JDialog{
 
 	/**

@@ -40,6 +40,11 @@ import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBioco
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 
+/*
+ * @author João Capela
+ *
+ */
+
 public class ValidationBiocoisoAIBView extends WorkspaceUpdatablePanel{
 
 	protected static final long serialVersionUID = 1L;
