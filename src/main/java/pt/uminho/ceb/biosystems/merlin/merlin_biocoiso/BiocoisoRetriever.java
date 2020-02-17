@@ -97,6 +97,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 	@Port(direction=Direction.INPUT, name="Backup",description="Backup model", order = 5)
 	public void setCommit(String commit) throws Exception {
 		
+		
 		this.url = FileUtils.readBioisoConfFile().get("host");
 		
 		this.commit = commit;
