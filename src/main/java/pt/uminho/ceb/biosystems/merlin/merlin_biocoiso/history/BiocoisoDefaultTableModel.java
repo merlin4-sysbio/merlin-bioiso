@@ -4,6 +4,10 @@ import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
+/*
+ * @author João Capela
+ *
+ */
 
 public class BiocoisoDefaultTableModel extends AbstractTableModel
 {

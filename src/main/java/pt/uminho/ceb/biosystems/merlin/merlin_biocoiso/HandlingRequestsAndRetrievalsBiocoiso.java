@@ -23,9 +23,6 @@ import org.slf4j.LoggerFactory;
  */
 public class HandlingRequestsAndRetrievalsBiocoiso {
 
-//	private static final String URL = "https://biocoiso.bio.di.uminho.pt";
-	
-//	private static final String URL = "https://bioiso.bio.di.uminho.pt";
 
 	final static Logger logger = LoggerFactory.getLogger(HandlingRequestsAndRetrievalsBiocoiso.class);
 	
@@ -39,7 +36,9 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 
 	private String email;
 
-	public HandlingRequestsAndRetrievalsBiocoiso(File model, String reaction, String objective, String url, String email){
+	private String fast;
+
+	public HandlingRequestsAndRetrievalsBiocoiso(File model, String reaction, String objective, String url, String email, boolean fast){
 
 		this.setModel(model);
 		
@@ -50,6 +49,9 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 		this.url = url;
 		
 		this.email = email;
+		
+		this.fast = Boolean.toString(fast);
+		
 		
 
 	}
@@ -63,9 +65,9 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 	 */
 	public String postFiles() throws IOException, InterruptedException {
 
-		String uploadUrl = this.url.concat("/submitMerlinPlugin/"+reaction+"/"+objective+"/"+this.email);
+		String uploadUrl = this.url.concat("/submitMerlinPlugin/"+reaction+"/"+objective+"/"+this.email+"/"+this.fast);
 		
-
+		System.out.println(uploadUrl);
 		String charset = "UTF-8";
 		String param = "value";
 

@@ -24,13 +24,20 @@ import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
+
+/** Bioiso Results importer
+ * @author João Capela
+ *
+ */
+
 @Operation(name="BioISO",description="Import results")
 public class BiocoisoResultsImporter {
 	
 	private WorkspaceAIB workspace;
 	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/notProducing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/producing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
-	
+	Icon unknown = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/question.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+
 
 	@Port(direction=Direction.INPUT, name="Workspace",description="", order = 1)
 	public void setWorkspace(WorkspaceAIB workspace) {
@@ -55,7 +62,7 @@ public class BiocoisoResultsImporter {
 
 		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
 				BiocoisoUtils.createDataTable(results_file.getAbsolutePath(), 
-						Arrays.asList(columnsName), this.workspace.getName(), name,produced,notProduced);
+						Arrays.asList(columnsName), this.workspace.getName(), name,produced,notProduced,unknown);
 
 		//		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
 		//				this.createDataTable("C:/Users/merlin Developer/Desktop/results_biocoiso_2.json", 

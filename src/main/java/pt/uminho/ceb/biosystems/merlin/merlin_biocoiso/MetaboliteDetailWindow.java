@@ -33,6 +33,11 @@ import pt.uminho.ceb.biosystems.merlin.gui.utilities.MyJTable;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
+/*
+ * @author João Capela
+ *
+ */
+
 public class MetaboliteDetailWindow extends javax.swing.JDialog{
 
 	/**

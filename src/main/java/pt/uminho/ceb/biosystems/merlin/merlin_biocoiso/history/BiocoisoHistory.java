@@ -5,6 +5,12 @@ import es.uvigo.ei.aibench.core.operation.annotation.Operation;
 import es.uvigo.ei.aibench.core.operation.annotation.Port;
 import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceAIB;
 
+
+/*
+ * @author João Capela
+ *
+ */
+
 @Operation(name="BioISO Simulation History",description="BioISO Simulation History")
 public class BiocoisoHistory {
 	

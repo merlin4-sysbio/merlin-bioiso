@@ -49,6 +49,11 @@ import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBioco
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
+
+/*
+ * @author João Capela
+ *
+ */
 public class BiocoisoHistoryGUI extends JDialog{
 
 	/**
@@ -61,6 +66,7 @@ public class BiocoisoHistoryGUI extends JDialog{
 	private BiocoisoButtonColumn buttonColumnCompare;
 	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/notProducing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/producing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	Icon unknown = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/question.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	private Map<String, Set<String>> actualModelData;
 
 
@@ -298,7 +304,7 @@ public class BiocoisoHistoryGUI extends JDialog{
 								Pair<WorkspaceGenericDataTable, Map<?, ?>> filledTableAndNextLevel;
 								try {
 									filledTableAndNextLevel = BiocoisoUtils.createDataTable(results_file.getAbsolutePath(), 
-											Arrays.asList(columnsName), getProject().getName(), name,produced,notProduced);
+											Arrays.asList(columnsName), getProject().getName(), name,produced,notProduced,unknown);
 
 
 									Map<?, ?> entireMap = BiocoisoUtils.readJSON(results_file.getAbsolutePath());

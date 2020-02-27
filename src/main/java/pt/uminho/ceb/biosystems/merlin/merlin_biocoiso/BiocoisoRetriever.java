@@ -40,7 +40,6 @@ import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceTableAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.jpanels.CustomGUI;
 import pt.uminho.ceb.biosystems.merlin.gui.utilities.AIBenchUtils;
-import pt.uminho.ceb.biosystems.merlin.gui.utilities.MerlinUtils;
 import pt.uminho.ceb.biosystems.merlin.gui.utilities.TimeLeftProgress;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.SequenceType;
@@ -49,6 +48,7 @@ import pt.uminho.ceb.biosystems.merlin.processes.WorkspaceProcesses;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelSequenceServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
+
 
 
 /**Aibench operation for BioISO
@@ -71,10 +71,12 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 	final static Logger logger = LoggerFactory.getLogger(BiocoisoRetriever.class);
 	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/notProducing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/producing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	Icon unknown = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/question.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	private String objective;
-	private String url;
 	private String commit;
 	private String email;
+	private boolean fast;
+	private String url;
 
 
 
@@ -89,13 +91,20 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 		this.objective=objective;
 	}
 
-//	@Port(direction=Direction.INPUT, name="url",description="default BioISO url", advanced=true, defaultValue = "https://bioiso.bio.di.uminho.pt", order = 4)
-//	public void setURL(String url) throws Exception{
-//		this.url = url;
-//	}
+	@Port(direction=Direction.INPUT, name="Fast BioISO",description="", order = 4)
+	public void setFast(String fast){
+		if (fast.equals("true")) 
+			this.fast=true;
+		
+		else 
+			this.fast=false;
+		
+		
+	}
 
 	@Port(direction=Direction.INPUT, name="Backup",description="Backup model", order = 5)
 	public void setCommit(String commit) throws Exception {
+		
 		
 		this.url = FileUtils.readBioisoConfFile().get("host");
 		
@@ -159,7 +168,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 
 		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
 				BiocoisoUtils.createDataTable(results_file.getAbsolutePath().concat("/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
-						Arrays.asList(columnsName), this.project.getName(), name,produced,notProduced);
+						Arrays.asList(columnsName), this.project.getName(), name,produced,notProduced,unknown);
 
 
 		Map<?, ?> entireMap = BiocoisoUtils.readJSON(results_file.getAbsolutePath().concat("/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"));
@@ -248,7 +257,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 		this.email = BiocoisoUtils.getEmail();
 		
 
-		HandlingRequestsAndRetrievalsBiocoiso post = new HandlingRequestsAndRetrievalsBiocoiso(model, this.reaction, this.objective, this.url, this.email);
+		HandlingRequestsAndRetrievalsBiocoiso post = new HandlingRequestsAndRetrievalsBiocoiso(model, this.reaction, this.objective, this.url, this.email, this.fast);
 
 		String submissionID = "";
 

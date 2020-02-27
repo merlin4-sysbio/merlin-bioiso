@@ -1,6 +1,7 @@
 package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
 
 
+import java.awt.Checkbox;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -17,6 +18,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -66,6 +68,8 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 	private JTextArea commit;
 
+	private JCheckBox fast;
+
 	public BiocoisoGUI() {
 
 		super(new JFrame());
@@ -99,6 +103,8 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 		AutoCompleteDecorator.decorate(this.reaction);
 
 		this.commit = new JTextArea(); 
+		
+		this.fast = new JCheckBox();
 
 		if(this.models.getModel().getSize()>0)
 			this.setReactions();
@@ -120,6 +126,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 				setReactions();
 			}
 		});
+		
 
 		InputParameter[] inPar = getInputParameters();
 		return new InputParametersPanel(inPar);
@@ -144,8 +151,8 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 								new ParamSpec("workspace", String.class,models.getSelectedItem().toString(),null),
 								new ParamSpec("reaction", String.class,reaction.getSelectedItem().toString(),null),
 								new ParamSpec("objective", String.class,objective.getSelectedItem().toString(),null),
-//								new ParamSpec("url", String.class,url.getText(),null),
-								new ParamSpec("commit", boolean.class,commit.getText(),null)
+								new ParamSpec("fast", String.class,Boolean.toString(fast.isSelected()),null),
+								new ParamSpec("commit", String.class,commit.getText(),null)
 
 						}
 						);
@@ -187,7 +194,7 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 	}
 
 	private InputParameter[] getInputParameters() {
-		InputParameter[] parameters = new InputParameter[4];
+		InputParameter[] parameters = new InputParameter[5];
 		parameters[0] = 
 
 				new InputParameter(
@@ -208,14 +215,14 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 						objective, 
 						"objective"
 						);
-//		parameters[3] = 
-//				new InputParameter(
-//						"URL", 
-//						url, 
-//						"BioISO URL"
-//						);
-		
 		parameters[3] = 
+				new InputParameter(
+						"Fast BioISO", 
+						fast, 
+						"Fast BioISO"
+						);
+		
+		parameters[4] = 
 				new InputParameter(
 						"commit", 
 						commit, 
@@ -251,9 +258,6 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 			ArrayList<String> reactions_list = new ArrayList<String>();
 
-//			Container container = new Container(new ContainerBuilder(workspace.getName(), "model_".concat(workspace.getName()),
-//					ProjectServices.isCompartmentalisedModel(workspace.getName()), false, "", "e-biomass"));
-
 			Map<Integer, List<MetaboliteContainer>> reactionMetabolites = 
 					this.getStoichiometry(reactions_dic, 
 							ProjectServices.isCompartmentalisedModel(workspace.getName()));
@@ -278,7 +282,9 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 			String[] reactions_list_arr =  reactions_list.toArray(new String[0]);
 			
-			reaction.setModel(new DefaultComboBoxModel<>(reactions_list_arr));
+			DefaultComboBoxModel<String> comboBox = new DefaultComboBoxModel<>(reactions_list_arr);
+			
+			reaction.setModel(comboBox);
 			
 			if (reactions_list_arr.length==0){
 				Workbench.getInstance().info("Please choose a workspace with reactions.");

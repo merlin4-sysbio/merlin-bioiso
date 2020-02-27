@@ -28,21 +28,14 @@
 				path="40@validation/30@BioISO" uid="operations.BioISOHistory.ID"
 				icon="icons/Lifecycle/remote.png" />
 		</extension> 
-		<extension uid="aibench.workbench"
-			name="aibench.workbench.view">
-			<icon-operation operation="operations.BioISOImporter.ID"
-				icon="icons/Lifecycle/remote.png" />
-		</extension>
-		
-		<extension uid="aibench.workbench"
-			name="aibench.workbench.view">
-			<icon-operation operation="operations.BioISOHistory.ID"
-				icon="icons/Lifecycle/remote.png" />
-		</extension>
 
 		<extension uid="aibench.workbench"
 			name="aibench.workbench.view">
 			<icon-operation operation="operations.BioISO.ID"
+				icon="icons/Lifecycle/remote.png" />
+			<icon-operation operation="operations.BioISOHistory.ID"
+				icon="icons/Lifecycle/remote.png" />
+			<icon-operation operation="operations.BioISOImporter.ID"
 				icon="icons/Lifecycle/remote.png" />
 		</extension>
 		

@@ -36,9 +36,15 @@ import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.services.ProjectServices;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelReactionsServices;
 import pt.uminho.ceb.biosystems.merlin.utilities.io.FileUtils;
-import pt.uminho.ceb.biosystems.mew.biocomponents.container.Container;
+import pt.uminho.ceb.biosystems.merlin.biocomponents.container.Container;
 import pt.uminho.ceb.biosystems.mew.biocomponents.container.io.readers.JSBMLLevel3Reader;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
+
+
+/*
+ * @author João Capela
+ *
+ */
 
 public class BiocoisoUtils {
 
@@ -417,18 +423,18 @@ public class BiocoisoUtils {
 	}
 
 	public static Pair<WorkspaceGenericDataTable, Map<?,?>> createDataTable(String file, List<String> columnsNames, String name, 
-			String windowName, Icon produced, Icon notProduced) throws IOException, ParseException {
+			String windowName, Icon produced, Icon notProduced, Icon unknown) throws IOException, ParseException {
 
 
 		Map<?,?> resultMap = BiocoisoUtils.readJSON(file);
 		Pair<WorkspaceGenericDataTable, Map<?,?>> tableAndNextLevel = tableCreator(resultMap, name, windowName, "M_fictitious"
-				,produced,notProduced);
+				,produced,notProduced, unknown);
 		return tableAndNextLevel;
 	}
 
 
 	public static Pair<WorkspaceGenericDataTable, Map<?,?>> tableCreator(Map<?,?> level, String name, String windowName, 
-			String metabolite, Icon produced, Icon notProduced) {
+			String metabolite, Icon produced, Icon notProduced, Icon unknown) {
 
 		String[] columnsName = new String[] {"info","metabolite", "reaction", "role", "analysis"};
 
@@ -458,7 +464,7 @@ public class BiocoisoUtils {
 
 				Map<?, ?> level2 = (Map<?, ?>) ((Map<?, ?>) nextLevel.get(key));
 
-				Object[] res = createLineFromMap(level2,key,produced,notProduced);
+				Object[] res = createLineFromMap(level2,key,produced,notProduced,unknown);
 
 				newTable.addLine(res);
 
@@ -507,14 +513,14 @@ public class BiocoisoUtils {
 	}
 
 	//palsson.di.uminho.pt:7475
-	public static Object[] createLineFromMap(Map<?,?> keyMap, String key, Icon produced, Icon notProduced) {
+	public static Object[] createLineFromMap(Map<?,?> keyMap, String key, Icon produced, Icon notProduced, Icon unknown) {
 
 		Object[] res = new Object[5];
 
 		res[1]=key;
 
-
-		Boolean flux = (Boolean) keyMap.get("analysis");
+		
+//		Object flux = Boolean keyMap.get("analysis");
 
 		@SuppressWarnings("unchecked")
 		ArrayList<ArrayList<String>> childrenList = (ArrayList<ArrayList<String>>) keyMap.get("reactions");
@@ -523,11 +529,20 @@ public class BiocoisoUtils {
 
 		res[3]=keyMap.get("role");
 
-		if (flux) {
-			res[4] = produced;
+		if (keyMap.get("analysis") instanceof Boolean) {
+			
+			Boolean flux = (Boolean) keyMap.get("analysis");
+			
+			if (flux)
+				res[4] = produced;
+			
+			else
+				res[4] = notProduced;
+			
 		}
+		
 		else {
-			res[4] = notProduced;
+			res[4] = unknown;
 		}
 		return res;
 	}
