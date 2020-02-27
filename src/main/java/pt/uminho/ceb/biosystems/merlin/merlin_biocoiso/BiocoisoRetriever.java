@@ -72,9 +72,10 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/notProducing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/producing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	private String objective;
-	private String url;
 	private String commit;
 	private String email;
+	private boolean fast;
+	private String url;
 
 
 
@@ -89,10 +90,10 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 		this.objective=objective;
 	}
 
-//	@Port(direction=Direction.INPUT, name="url",description="default BioISO url", advanced=true, defaultValue = "https://bioiso.bio.di.uminho.pt", order = 4)
-//	public void setURL(String url) throws Exception{
-//		this.url = url;
-//	}
+	@Port(direction=Direction.INPUT, name="Fast BioISO",description="", order = 4)
+	public void setFast(String fast){
+		this.fast = Boolean.getBoolean(fast);
+	}
 
 	@Port(direction=Direction.INPUT, name="Backup",description="Backup model", order = 5)
 	public void setCommit(String commit) throws Exception {
@@ -249,7 +250,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 		this.email = BiocoisoUtils.getEmail();
 		
 
-		HandlingRequestsAndRetrievalsBiocoiso post = new HandlingRequestsAndRetrievalsBiocoiso(model, this.reaction, this.objective, this.url, this.email);
+		HandlingRequestsAndRetrievalsBiocoiso post = new HandlingRequestsAndRetrievalsBiocoiso(model, this.reaction, this.objective, this.url, this.email, this.fast);
 
 		String submissionID = "";
 
