@@ -71,6 +71,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 	final static Logger logger = LoggerFactory.getLogger(BiocoisoRetriever.class);
 	Icon notProduced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/notProducing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	Icon produced = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/producing.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
+	Icon unknown = new ImageIcon(new ImageIcon(getClass().getClassLoader().getResource("icons/question.png")).getImage().getScaledInstance(20, 20, Image.SCALE_DEFAULT));
 	private String objective;
 	private String commit;
 	private String email;
@@ -92,7 +93,13 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 
 	@Port(direction=Direction.INPUT, name="Fast BioISO",description="", order = 4)
 	public void setFast(String fast){
-		this.fast = Boolean.getBoolean(fast);
+		if (fast.equals("true")) 
+			this.fast=true;
+		
+		else 
+			this.fast=false;
+		
+		
 	}
 
 	@Port(direction=Direction.INPUT, name="Backup",description="Backup model", order = 5)
@@ -161,7 +168,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 
 		Pair<WorkspaceGenericDataTable, Map<?,?>> filledTableAndNextLevel = 
 				BiocoisoUtils.createDataTable(results_file.getAbsolutePath().concat("/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
-						Arrays.asList(columnsName), this.project.getName(), name,produced,notProduced);
+						Arrays.asList(columnsName), this.project.getName(), name,produced,notProduced,unknown);
 
 
 		Map<?, ?> entireMap = BiocoisoUtils.readJSON(results_file.getAbsolutePath().concat("/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"));

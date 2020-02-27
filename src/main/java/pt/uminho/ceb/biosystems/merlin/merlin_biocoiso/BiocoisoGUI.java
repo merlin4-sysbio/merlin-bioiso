@@ -151,8 +151,8 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 								new ParamSpec("workspace", String.class,models.getSelectedItem().toString(),null),
 								new ParamSpec("reaction", String.class,reaction.getSelectedItem().toString(),null),
 								new ParamSpec("objective", String.class,objective.getSelectedItem().toString(),null),
-								new ParamSpec("fast", boolean.class,fast.isSelected(),null),
-								new ParamSpec("commit", boolean.class,commit.getText(),null)
+								new ParamSpec("fast", String.class,Boolean.toString(fast.isSelected()),null),
+								new ParamSpec("commit", String.class,commit.getText(),null)
 
 						}
 						);
@@ -282,7 +282,9 @@ public class BiocoisoGUI extends AbstractInputJDialog implements InputGUI{
 
 			String[] reactions_list_arr =  reactions_list.toArray(new String[0]);
 			
-			reaction.setModel(new DefaultComboBoxModel<>(reactions_list_arr));
+			DefaultComboBoxModel<String> comboBox = new DefaultComboBoxModel<>(reactions_list_arr);
+			
+			reaction.setModel(comboBox);
 			
 			if (reactions_list_arr.length==0){
 				Workbench.getInstance().info("Please choose a workspace with reactions.");
