@@ -67,12 +67,10 @@ public class HandlingRequestsAndRetrievalsBiocoiso {
 
 		String uploadUrl = this.url.concat("/submitMerlinPlugin/"+reaction+"/"+objective+"/"+this.email+"/"+this.fast);
 		
-		System.out.println(uploadUrl);
 		String charset = "UTF-8";
 		String param = "value";
 
 
-		//	File binaryFile = new File("C:\\Users\\Davide\\Desktop\\roff2018.pdf");
 		String boundary = Long.toHexString(System.currentTimeMillis()); // Just generate some unique random value.
 		String CRLF = "\r\n"; // Line separator required by multipart/form-data.
 

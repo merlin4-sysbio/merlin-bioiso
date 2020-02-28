@@ -18,6 +18,7 @@ import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.gui.datatypes.WorkspaceTableAIB;
 import pt.uminho.ceb.biosystems.merlin.gui.datatypes.interfaces.IEntityAIB;
+import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.BiocoisoUtils;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoiso;
 import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
@@ -251,8 +252,6 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 		refresh = true;
 
-		//		int row = identifier;
-
 		Map<?,?> nextToReturn = (Map<?, ?>) ((Map<?,?>) next.get(metabolite));
 		
 		ArrayList<ArrayList<Object>> reactions = (ArrayList<ArrayList<Object>>) ((Map<?,?>) next.get(metabolite)).get("reactions"); //list with reactions
@@ -277,13 +276,29 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 				String reactionID =  (String) reaction.get(0); //r10856
 
-				Boolean analysis = (Boolean) reaction.get(1);
+				Icon analysisIcon;
+				
+				if (reaction.get(1) instanceof Boolean) {
+					
+					Boolean flux = (Boolean) reaction.get(1);
+					
+					if (flux)
+						analysisIcon = produced;
+					
+					else
+						analysisIcon = notProduced;
+					
+				}
+				
+				else {
+					analysisIcon = dontknow;
+				}
 
 				ArrayList<String> reactantsList = (ArrayList<String>) reaction.get(2);
 
 				ArrayList<String> productsList = (ArrayList<String>) reaction.get(3);
-
-				Object[] line = createLineFromMap(analysis, reactionID, reactantsList, productsList);
+				
+				Object[] line = createLineFromMap(analysisIcon, reactionID, reactantsList, productsList);
 
 				results[0].addLine(line);
 
@@ -307,7 +322,7 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 		return super.getRowInfo();
 	}
 
-	private Object[] createLineFromMap(Boolean analysis, String reactionID, ArrayList<String> reactantsList, ArrayList<String> productsList) {
+	private Object[] createLineFromMap(Icon analysis, String reactionID, ArrayList<String> reactantsList, ArrayList<String> productsList) {
 		Object[] res = new Object[5];
 
 		res[1]=reactionID;
@@ -316,12 +331,8 @@ public class ValidationBiocoisoAIB extends ValidationBiocoiso implements IEntity
 
 		res[3] = Integer.toString(productsList.size());
 
-		if (analysis) {
-			res[4] = produced;
-		}
-		else {
-			res[4] = notProduced;
-		}
+		res[4] = analysis;
+		
 		return res;
 	}
 

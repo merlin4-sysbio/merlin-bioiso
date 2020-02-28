@@ -113,8 +113,18 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 		try {
 			
 			this.startTime = GregorianCalendar.getInstance().getTimeInMillis();
-
-			boolean submitted = submitFiles();
+			
+			if (this.fast) {
+//				Workbench.getInstance().info("as you are executing Fast BioISO, \nif the tested metabolites have more than 20 reactions,"
+//					+ " be aware that only 10% of them will be tested" );
+				setCancelFast();
+			}
+			
+			boolean submitted = false;
+			
+			if (!this.cancel.get())
+				submitted = submitFiles();
+				
 
 			if (submitted && !this.cancel.get()) {
 
@@ -505,6 +515,27 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 	public TimeLeftProgress getProgress() {
 
 		return progress;
+	}
+	
+	
+	public void setCancelFast() {
+
+		String[] options = new String[2];
+		options[0] = "yes";
+		options[1] = "no";
+
+		int result = CustomGUI.stopQuestion("BioISO Fast", "as you are executing Fast BioISO, \nif the tested metabolites have more than 20 reactions,\n" + 
+									"be aware that only 10% of them will be tested. \n"
+									+ "do you want to proceed anyway?", options);
+
+		if(result == 1) {
+			this.cancel.set(true);
+		}
+		
+
+		progress.setTime(0, 0, 0);
+
+
 	}
 
 	/**
