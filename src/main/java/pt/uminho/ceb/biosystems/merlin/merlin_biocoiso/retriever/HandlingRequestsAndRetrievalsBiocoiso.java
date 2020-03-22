@@ -1,4 +1,4 @@
-package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
+package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.retriever;
 
 
 import java.io.BufferedReader;

@@ -1,4 +1,4 @@
-package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
+package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.retriever;
 
 
 import java.awt.Image;
@@ -43,6 +43,7 @@ import pt.uminho.ceb.biosystems.merlin.gui.utilities.AIBenchUtils;
 import pt.uminho.ceb.biosystems.merlin.gui.utilities.TimeLeftProgress;
 import pt.uminho.ceb.biosystems.merlin.core.datatypes.WorkspaceGenericDataTable;
 import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.SequenceType;
+import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.BiocoisoUtils;
 import pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB;
 import pt.uminho.ceb.biosystems.merlin.processes.WorkspaceProcesses;
 import pt.uminho.ceb.biosystems.merlin.services.model.ModelSequenceServices;

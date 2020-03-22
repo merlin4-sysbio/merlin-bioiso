@@ -10,10 +10,19 @@
 	<extensions>
 		<extension uid="aibench.core"
 			name="aibench.core.operation-definition"
-			class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.BiocoisoRetriever">
+			class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.retriever.BiocoisoRetriever">
 			<operation-description name="execute BioISO"
 				path="40@validation/10@BioISO" uid="operations.BioISO.ID" />
 		</extension>
+		
+		<extension uid="aibench.workbench"
+			name="aibench.workbench.view">
+
+			<gui-operation operation="operations.BioISO.ID"
+				class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.retriever.BiocoisoGUI" />
+		</extension>
+		
+		<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 		
 		<extension uid="aibench.core"
 			name="aibench.core.operation-definition"
@@ -21,6 +30,10 @@
 			<operation-description name="import BioISO results"
 				path="40@validation/20@BioISO" uid="operations.BioISOImporter.ID" />
 		</extension>
+		
+		<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+		
+		
 		<extension uid="aibench.core"
 			name="aibench.core.operation-definition"
 			class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.history.BiocoisoHistory">
@@ -28,6 +41,8 @@
 				path="40@validation/30@BioISO" uid="operations.BioISOHistory.ID"
 				icon="icons/Lifecycle/remote.png" />
 		</extension> 
+		
+		<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
 		<extension uid="aibench.workbench"
 			name="aibench.workbench.view">
@@ -39,19 +54,13 @@
 				icon="icons/Lifecycle/remote.png" />
 		</extension>
 		
-		<extension uid="aibench.workbench"
-			name="aibench.workbench.view">
-
-			<gui-operation operation="operations.BioISO.ID"
-				class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.BiocoisoGUI" />
-		</extension>
+		<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
 		<extension uid="aibench.workbench"
 			name="aibench.workbench.view">
 			<view name="BioISO results"
 				datatype="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB"
 				class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoisoAIBView" />
-				<!-- class="pt.uminho.ceb.biosystems.merlin.aibench.views.WorkspaceGenericEntityDataView" /> -->
 		</extension>
 		<!-- <extension uid="aibench.workbench"
 			name="aibench.workbench.view"  >

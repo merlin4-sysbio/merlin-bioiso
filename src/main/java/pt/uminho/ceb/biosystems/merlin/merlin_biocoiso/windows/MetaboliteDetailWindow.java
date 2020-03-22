@@ -1,4 +1,4 @@
-package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso;
+package pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.windows;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
