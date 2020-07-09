@@ -180,9 +180,11 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 				BiocoisoUtils.createDataTable(results_file.getAbsolutePath().concat("/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"), 
 						Arrays.asList(columnsName), this.project.getName(), name,produced,notProduced,unknown);
 
-
+		
 		Map<?, ?> entireMap = BiocoisoUtils.readJSON(results_file.getAbsolutePath().concat("/results/results_").concat(BIOCOISO_FILE_NAME).concat(".json"));
 
+		System.out.println(entireMap);
+		
 		ValidationBiocoisoAIB biocoiso = new ValidationBiocoisoAIB(table, name, filledTableAndNextLevel.getB(), entireMap);
 
 		biocoiso.setWorkspace(this.project);
