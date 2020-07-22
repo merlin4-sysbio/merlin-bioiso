@@ -32,11 +32,11 @@
 		<extension uid="aibench.workbench"
 			name="aibench.workbench.view">
 			<icon-operation operation="operations.BioISO.ID"
-				icon="icons/Lifecycle/remote.png" />
+				icon="icons/bioiso.png" />
 			<icon-operation operation="operations.BioISOHistory.ID"
-				icon="icons/Lifecycle/remote.png" />
+				icon="icons/bioiso.png" />
 			<icon-operation operation="operations.BioISOImporter.ID"
-				icon="icons/Lifecycle/remote.png" />
+				icon="icons/bioiso.png" />
 		</extension>
 		
 		<extension uid="aibench.workbench"
@@ -52,6 +52,14 @@
 				datatype="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB"
 				class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoisoAIBView" />
 				<!-- class="pt.uminho.ceb.biosystems.merlin.aibench.views.WorkspaceGenericEntityDataView" /> -->
+		</extension>
+		
+		<extension uid="aibench.workbench"
+            name="aibench.workbench.view">
+            <view name="BioISO results"
+                datatype="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB"
+                class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoisoAIBView" />
+            <menu-icon menu="validation/BioISO" icon="conf/icons/bioiso.png" />
 		</extension>
 		<!-- <extension uid="aibench.workbench"
 			name="aibench.workbench.view"  >

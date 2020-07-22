@@ -109,7 +109,7 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 		this.url = FileUtils.readBioisoConfFile().get("host");
 		
 		this.commit = commit;
-
+		
 		try {
 			
 			this.startTime = GregorianCalendar.getInstance().getTimeInMillis();
@@ -160,12 +160,12 @@ public class BiocoisoRetriever implements PropertyChangeListener {
 
 
 		this.project = AIBenchUtils.getProject(projectName);
+		
 
 	}
 
 	private void executeOperation() throws IOException, ParseException {
-
-
+		
 		int table_number = this.project.getDatabase().getValidation().getEntities().size() + 1;
 
 		String name = Integer.toString(table_number) + " - " + this.reaction;
