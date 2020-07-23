@@ -14,31 +14,34 @@
 			<operation-description name="execute BioISO"
 				path="40@validation/10@BioISO" uid="operations.BioISO.ID" />
 		</extension>
-		
+
 		<extension uid="aibench.core"
 			name="aibench.core.operation-definition"
 			class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.BiocoisoResultsImporter">
-			<operation-description name="import BioISO results"
-				path="40@validation/20@BioISO" uid="operations.BioISOImporter.ID" />
+			<operation-description
+				name="import BioISO results" path="40@validation/20@BioISO"
+				uid="operations.BioISOImporter.ID" />
 		</extension>
 		<extension uid="aibench.core"
 			name="aibench.core.operation-definition"
 			class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.history.BiocoisoHistory">
-			<operation-description name="BioISO simulation history"
-				path="40@validation/30@BioISO" uid="operations.BioISOHistory.ID"
-				icon="icons/Lifecycle/remote.png" />
-		</extension> 
+			<operation-description
+				name="BioISO simulation history" path="40@validation/30@BioISO"
+				uid="operations.BioISOHistory.ID" icon="icons/Lifecycle/remote.png" />
+		</extension>
 
 		<extension uid="aibench.workbench"
 			name="aibench.workbench.view">
 			<icon-operation operation="operations.BioISO.ID"
 				icon="icons/Lifecycle/remote.png" />
-			<icon-operation operation="operations.BioISOHistory.ID"
+			<icon-operation
+				operation="operations.BioISOHistory.ID"
 				icon="icons/Lifecycle/remote.png" />
-			<icon-operation operation="operations.BioISOImporter.ID"
+			<icon-operation
+				operation="operations.BioISOImporter.ID"
 				icon="icons/Lifecycle/remote.png" />
 		</extension>
-		
+
 		<extension uid="aibench.workbench"
 			name="aibench.workbench.view">
 
@@ -51,12 +54,11 @@
 			<view name="BioISO results"
 				datatype="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.datatypes.ValidationBiocoisoAIB"
 				class="pt.uminho.ceb.biosystems.merlin.merlin_biocoiso.ValidationBiocoisoAIBView" />
-				<!-- class="pt.uminho.ceb.biosystems.merlin.aibench.views.WorkspaceGenericEntityDataView" /> -->
+			<menu-icon menu="validation/BioISO" icon="conf/icons/bioisoFORMAT_THIS_PLEASE.png" />
+				
+
 		</extension>
-		<!-- <extension uid="aibench.workbench"
-			name="aibench.workbench.view"  >
-			<menu-icon menu="validation/BioISO" icon="icons/Lifecycle/remote.png" />
-		</extension> -->
-			
+
+		
 	</extensions>
 </plugin>
